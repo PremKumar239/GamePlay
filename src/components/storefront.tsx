@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock3, Gamepad2, Headphones, Heart, MapPin, Menu, MessageCircle, Minus, Phone, Plus, Search, ShieldCheck, ShoppingBag, ShoppingCart, Star, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import consoleBanner from '@/assets/console-banner.jpg';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
+import { useShopping } from '@/components/shopping-context';
 
 export function Brand() { return <Link to="/" className="brand"><img src={logo.url} alt="GAME PLAY logo" width={65} height={65} /><span>GAME<span className="text-success"> PLAY</span></span></Link>; }
 
@@ -14,9 +15,9 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialQuer
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [deals, setDeals] = useState(initialDeals);
-  const [cart, setCart] = useState<Record<number, number>>({});
+  const {cart, setCart, favorites, setFavorites} = useShopping();
+  const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
-  const [favorites, setFavorites] = useState<number[]>([]);
   const [wishOnly, setWishOnly] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,7 +33,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialQuer
   const add = (id: number) => { setCart(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 })); setCartOpen(true); };
   const toggleFavorite = (id: number) => setFavorites(prev => prev.includes(id) ? prev.filter(n => n !== id) : [...prev, id]);
   const visible = filterProducts(category, query, deals).filter(p => !wishOnly || favorites.includes(p.id));
-  const searchSubmit = (e: React.FormEvent) => { e.preventDefault(); document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); };
+  const searchSubmit = (e: React.FormEvent) => { e.preventDefault(); if(page === 'contact') { navigate({ to: '/shop', search: { category: 'All', q: query, deals: false } }); } else { document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); } };
   return <>
     <div className="top-strip"><div className="store-container flex items-center justify-between gap-3 py-2"><span>Welcome to GAME PLAY. Your next level starts here.</span><div className="desktop-only flex gap-5"><a href={mapUrl} target="_blank" rel="noreferrer">Visit our Lahore store</a><a href="tel:+923235551600">Need help? 0323 5551600</a></div></div></div>
     <header className="store-container main-header"><Brand /><form className="search-form" onSubmit={searchSubmit}><input aria-label="Search products" placeholder="Search for consoles, games, accessories..." value={query} onChange={e => setQuery(e.target.value)} /><Button type="submit" variant="shop" size="icon" aria-label="Submit search"><Search /></Button></form><div className="header-actions"><Button variant="ghost" className="header-action px-1" title="Wishlist" onClick={() => { setWishOnly(!wishOnly); document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}><Heart size={23} className={wishOnly ? 'text-success' : ''} /><span className="header-action-text text-xs">Wishlist</span>{favorites.length > 0 && <span className="count-badge">{favorites.length}</span>}</Button><Button variant="ghost" className="header-action px-1" aria-label={`Open shopping cart, ${count} items`} onClick={() => setCartOpen(true)}><ShoppingBag size={23} /><span className="count-badge">{count}</span><span className="header-action-text text-left"><span className="block text-[10px] text-muted-foreground">Shopping cart</span><strong className="text-xs">{money(cartTotal(cart))}</strong></span></Button></div></header>

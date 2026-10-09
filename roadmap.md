@@ -1,5 +1,5 @@
 # GAME PLAY storefront
-- [ ] Inspect EEZEPC and adapt its storefront design.
-- [ ] Create gaming banners, catalog, categories and shopping interactions.
-- [ ] Add store contact, maps and supplied review summary.
-- [ ] Verify navigation, shopping interactions and layouts.
+- [x] Inspect accessible EEZEPC information and adapt its storefront design; direct viewing was restricted.
+- [x] Create gaming banners, sample catalog, categories and shopping interactions.
+- [x] Add store contact, maps and supplied review summary.
+- [x] Verify navigation, shopping interactions and desktop, tablet and phone layouts; 10 tests passed.

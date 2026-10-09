@@ -9,6 +9,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        shop: "bg-primary text-primary-foreground rounded-sm font-bold hover:bg-primary/85 transition-all hover:gap-3 active:scale-95",
+        dark: "bg-ink text-ink-foreground rounded-sm hover:bg-ink/85",
+        banner: "border border-ink-foreground/50 text-ink-foreground bg-transparent rounded-sm hover:bg-ink-foreground hover:text-ink",
         default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

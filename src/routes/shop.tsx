@@ -3,9 +3,9 @@ import { Storefront } from '@/components/storefront';
 
 export const Route = createFileRoute('/shop')({
   validateSearch: (search: Record<string, unknown>) => ({
-    category: typeof search.category === 'string' ? search.category : 'All',
-    q: typeof search.q === 'string' ? search.q : '',
-    deals: search.deals === true || search.deals === 'true',
+    category: typeof search['category'] === 'string' ? search['category'] : 'All',
+    q: typeof search['q'] === 'string' ? search['q'] : '',
+    deals: search['deals'] === true || search['deals'] === 'true',
   }),
   head: () => ({ meta: [
     { title: 'Shop Consoles, Games & Gaming Gear | GAME PLAY' },

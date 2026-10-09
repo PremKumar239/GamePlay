@@ -2,14 +2,13 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock3, Gamepad2, Headphones, Heart, MapPin, Menu, MessageCircle, Minus, Phone, Plus, Search, ShieldCheck, ShoppingBag, ShoppingCart, Star, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import logo from '@/assets/game-play-logo.png.asset.json';
 import consoleBanner from '@/assets/console-banner.jpg';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
-export function Brand() { return <Link to="/" className="brand"><img src={logo.url} alt="GAME PLAY logo" width={72} height={72} /></Link>; }
+export function Brand() { return <Link to="/" className="brand"><img src="/favicon.png" alt="GAME PLAY logo" width={72} height={72} /></Link>; }
 
 export function Storefront({ page = 'home', initialCategory = 'All', initialQuery = '', initialDeals = false }: { page?: 'home' | 'shop' | 'contact'; initialCategory?: string; initialQuery?: string; initialDeals?: boolean }) {
   const [query, setQuery] = useState(initialQuery);

@@ -9,7 +9,7 @@ import accessoriesBanner from '@/assets/accessories-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
-export function Brand() { return <Link to="/" className="brand"><img src={logo.url} alt="GAME PLAY logo" width={65} height={65} /><span>GAME<span className="text-success"> PLAY</span></span></Link>; }
+export function Brand() { return <Link to="/" className="brand"><img src={logo.url} alt="GAME PLAY logo" width={72} height={72} /></Link>; }
 
 export function Storefront({ page = 'home', initialCategory = 'All', initialQuery = '', initialDeals = false }: { page?: 'home' | 'shop' | 'contact'; initialCategory?: string; initialQuery?: string; initialDeals?: boolean }) {
   const [query, setQuery] = useState(initialQuery);

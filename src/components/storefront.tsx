@@ -5,6 +5,12 @@ import { Button } from '@/components/ui/button';
 import consoleBanner from '@/assets/console-banner.jpg';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
+import playstationGift from '@/assets/gift-playstation.jpg';
+import xboxGift from '@/assets/gift-xbox.jpg';
+import nintendoGift from '@/assets/gift-nintendo.jpg';
+import steamGift from '@/assets/gift-steam.jpg';
+import robloxGift from '@/assets/gift-roblox.jpg';
+import pcGift from '@/assets/gift-pc.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
@@ -52,14 +58,14 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialQuer
 function SectionHeading({title,link}:{title:string;link?:string}) { return <div className="section-heading"><h2>{title}</h2>{link && <Link className="section-link" to="/shop" search={{category:'All',q:'',deals:false}}>{link} <ArrowRight size={14} /></Link>}</div>; }
 function GiftCards() {
   const cards = [
-    { name: 'PlayStation', value: 'Rs. 5,000', tone: 'ps' },
-    { name: 'Xbox', value: 'Rs. 5,000', tone: 'xbox' },
-    { name: 'Nintendo', value: 'Rs. 3,000', tone: 'nintendo' },
-    { name: 'Steam', value: 'Rs. 2,500', tone: 'steam' },
-    { name: 'Roblox', value: 'Rs. 1,500', tone: 'roblox' },
-    { name: 'PC Games', value: 'Rs. 2,000', tone: 'pc' },
+    { name: 'PlayStation', value: 'Rs. 5,000', tone: 'ps', image: playstationGift },
+    { name: 'Xbox', value: 'Rs. 5,000', tone: 'xbox', image: xboxGift },
+    { name: 'Nintendo', value: 'Rs. 3,000', tone: 'nintendo', image: nintendoGift },
+    { name: 'Steam', value: 'Rs. 2,500', tone: 'steam', image: steamGift },
+    { name: 'Roblox', value: 'Rs. 1,500', tone: 'roblox', image: robloxGift },
+    { name: 'PC Games', value: 'Rs. 2,000', tone: 'pc', image: pcGift },
   ];
-  return <section className="section store-container" aria-label="Gift Cards"><SectionHeading title="Gift Cards" /><div className="gift-grid">{cards.map(card => <a key={card.name} className={`gift-card gift-${card.tone}`} href={whatsapp(`Hi GAME PLAY! I would like to ask about a ${card.name} gift card around ${card.value}.`)} target="_blank" rel="noreferrer"><span className="gift-chip">GIFT CARD</span><strong>{card.name}</strong><span className="gift-value">{card.value}</span><span className="gift-ask">Ask the store <ArrowUpRight size={14} /></span></a>)}</div><p className="gift-note">Sample values. GAME PLAY will confirm the cards and prices available in store.</p></section>;
+  return <section className="section store-container" aria-label="Gift Cards"><SectionHeading title="Gift Cards" /><div className="gift-grid">{cards.map(card => <a key={card.name} className={`gift-card gift-${card.tone}`} href={whatsapp(`Hi GAME PLAY! I would like to ask about a ${card.name} gift card around ${card.value}.`)} target="_blank" rel="noreferrer"><img src={card.image} alt="" width={480} height={360} /><span className="gift-body"><span className="gift-chip">GIFT CARD</span><strong>{card.name}</strong><span className="gift-value">{card.value}</span><span className="gift-ask">Ask the store <ArrowUpRight size={14} /></span></span></a>)}</div><p className="gift-note">Sample values. GAME PLAY will confirm the cards and prices available in store.</p></section>;
 }
 function WhatsHot() {
   const picks = [1, 2, 7].map(id => products.find(p => p.id === id)).filter((p): p is Product => Boolean(p));

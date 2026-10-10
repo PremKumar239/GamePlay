@@ -178,7 +178,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .category-menu { border-right:1px solid color-mix(in oklch,var(--ink-foreground) 15%,transparent); padding-right:32px; margin-right:4px; }
 .hero { position:relative; aspect-ratio:2.95; overflow:hidden; background:var(--ink); border-radius:0; width:calc(100% + 32px); margin-inline:-16px; }
 .banner-image { position:absolute; width:100%; height:100%; object-fit:cover; inset:0; transition:transform .7s ease; }
-.hero:hover .banner-image,.promo-banner:hover .banner-image { transform:scale(1.025); }
+.hero .banner-image { opacity:0; transform:scale(1.08); transition:opacity .8s ease, transform 1s ease; pointer-events:none; }
+.hero .banner-image.is-active { opacity:1; transform:scale(1); }
+.hero:hover .banner-image.is-active,.promo-banner:hover .banner-image { transform:scale(1.025); }
 .hero-copy { position:relative; z-index:1; color:var(--ink-foreground); padding:48px 58px; width:58%; }
 .eyebrow { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; }
 .hero h1 { font-family:var(--font-display); font-size:64px; font-weight:700; line-height:1; margin:16px 0; }
@@ -240,7 +242,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .footer a:hover { color:var(--primary); }
 .footer-bottom { border-top:1px solid color-mix(in oklch,var(--ink-foreground) 12%,transparent); padding:17px 0; font-size:10px; color:color-mix(in oklch,var(--ink-foreground) 55%,transparent); }
 .reveal { animation:reveal .6s ease both; }
+.hero-copy.reveal { animation:hero-in .8s cubic-bezier(.22,.7,.2,1) both; }
 @keyframes reveal { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+@keyframes hero-in { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:none; } }
 .floating-contact { position:fixed; right:22px; bottom:22px; z-index:30; border-radius:50%; width:48px; height:48px; box-shadow:0 4px 20px color-mix(in oklch,var(--ink) 20%,transparent); }
 .drawer-backdrop { position:fixed; inset:0; z-index:60; background:color-mix(in oklch,var(--ink) 50%,transparent); display:flex; justify-content:flex-end; }
 .cart-drawer { width:min(430px,100%); height:100%; background:var(--background); padding:24px; overflow-y:auto; }

@@ -7,6 +7,17 @@ import handheldImage from '@/assets/product-5.jpg';
 import gameImage from '@/assets/games-banner.jpg';
 import xboxImage from '@/assets/gift-xbox.jpg';
 import giftImage from '@/assets/gift-playstation.jpg';
+import { supabase } from '@/lib/supabase';
+
+const productImages: Record<string, string> = {
+  'product-0': consoleImage,
+  'product-1': controllerImage,
+  'product-2': headsetImage,
+  'product-3': keyboardImage,
+  'product-4': mouseImage,
+  'product-5': handheldImage,
+  'games-banner': gameImage,
+};
 
 export const business = {
   name: 'GAME PLAY', rating: 4.8, reviews: 76,
@@ -46,8 +57,25 @@ export const categories = [
   { name: 'Mice', label: 'Precision meets speed', image: mouseImage },
 ];
 export const money = (value: number) => `Rs. ${value.toLocaleString('en-PK')}`;
-export function filterProducts(category: string, query: string, deals = false, subcategory = '') {
-  return products.filter(p => {
+type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; price: number; old_price: number | null; badge: string | null };
+export async function loadProductsFromDatabase(): Promise<Product[] | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,price,old_price,badge').order('id');
+  if (error || !data?.length) return null;
+  return (data as ProductRow[]).map(row => ({
+    id: row.id,
+    name: row.name,
+    category: row.category,
+    group: row.group_name ?? undefined,
+    subcategory: row.subcategory ?? undefined,
+    image: productImages[row.image_key] ?? consoleImage,
+    price: row.price,
+    oldPrice: row.old_price ?? undefined,
+    badge: row.badge ?? undefined,
+  }));
+}
+export function filterProducts(category: string, query: string, deals = false, subcategory = '', source: Product[] = products) {
+  return source.filter(p => {
     const inGroup = category !== 'All' && p.group === category;
     const inLegacy = category !== 'All' && p.category === category;
     const matchesCategory = category === 'All' || inGroup || inLegacy;

@@ -4,14 +4,14 @@ import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock
 import { Button } from '@/components/ui/button';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
-import codBanner from '@/assets/cod-banner.webp';
+import codBanner from '@/assets/cod-banner.png';
 import playstationGift from '@/assets/gift-playstation.jpg';
 import xboxGift from '@/assets/gift-xbox.jpg';
 import nintendoGift from '@/assets/gift-nintendo.jpg';
 import steamGift from '@/assets/gift-steam.jpg';
 import robloxGift from '@/assets/gift-roblox.jpg';
 import pcGift from '@/assets/gift-pc.jpg';
-import gtaBanner from '@/assets/gta6-banner.webp';
+import gtaBanner from '@/assets/gta6-banner.png';
 import metroBanner from '@/assets/metro-banner.webp';
 import gameplayBanner from '@/assets/gameplay-banner.jpg';
 import { business, catalog, products, money, filterProducts, mapUrl, whatsapp, shopSearch, loadProductsFromDatabase, type Product } from '@/lib/store';

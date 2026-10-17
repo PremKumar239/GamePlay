@@ -4,15 +4,15 @@ import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock
 import { Button } from '@/components/ui/button';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
-import codBanner from '@/assets/cod-banner.jpg';
+import codBanner from '@/assets/cod-banner.webp';
 import playstationGift from '@/assets/gift-playstation.jpg';
 import xboxGift from '@/assets/gift-xbox.jpg';
 import nintendoGift from '@/assets/gift-nintendo.jpg';
 import steamGift from '@/assets/gift-steam.jpg';
 import robloxGift from '@/assets/gift-roblox.jpg';
 import pcGift from '@/assets/gift-pc.jpg';
-import gtaBanner from '@/assets/gta6-banner.jpg';
-import metroBanner from '@/assets/metro-banner.jpg';
+import gtaBanner from '@/assets/gta6-banner.webp';
+import metroBanner from '@/assets/metro-banner.webp';
 import gameplayBanner from '@/assets/gameplay-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
@@ -76,7 +76,7 @@ function WhatsHot() {
 }
 function Hero() {
   const [slide,setSlide] = useState(0);
-  const slides = [{image:metroBanner,alt:'Metro 2026, pre-order now',category:'Games'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026',category:'Games'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026',category:'Games'}, {image:gameplayBanner,alt:'Game Play, your ultimate gaming hub',category:'All'}];
+  const slides = [{image:metroBanner,alt:'Metro 2039, pre-order now',category:'Games'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026',category:'Games'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026',category:'Games'}, {image:gameplayBanner,alt:'Game Play, your ultimate gaming hub',category:'All'}];
   useEffect(() => {
     const id = window.setTimeout(() => setSlide(currentSlide => (currentSlide + 1) % slides.length), 3000);
     return () => window.clearTimeout(id);

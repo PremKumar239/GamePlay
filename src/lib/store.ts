@@ -57,22 +57,33 @@ export const categories = [
   { name: 'Mice', label: 'Precision meets speed', image: mouseImage },
 ];
 export const money = (value: number) => `Rs. ${value.toLocaleString('en-PK')}`;
-type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; price: number; old_price: number | null; badge: string | null };
+type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; image_url?: string | null; price: number; old_price: number | null; badge: string | null };
 export async function loadProductsFromDatabase(): Promise<Product[] | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,price,old_price,badge').order('id');
+  const withUploads = await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge').order('id');
+  const result = withUploads.error ? await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,price,old_price,badge').order('id') : withUploads;
+  const { data, error } = result;
   if (error || !data?.length) return null;
-  return (data as ProductRow[]).map(row => ({
-    id: row.id,
-    name: row.name,
-    category: row.category,
-    group: row.group_name ?? undefined,
-    subcategory: row.subcategory ?? undefined,
-    image: productImages[row.image_key] ?? consoleImage,
-    price: row.price,
-    oldPrice: row.old_price ?? undefined,
-    badge: row.badge ?? undefined,
-  }));
+  return (data as ProductRow[]).map(row => {
+    const product: Product = {
+      id: row.id,
+      name: row.name,
+      category: row.category,
+      image: row.image_url || productImages[row.image_key] || consoleImage,
+      price: row.price,
+    };
+    if (row.group_name) product.group = row.group_name;
+    if (row.subcategory) product.subcategory = row.subcategory;
+    if (row.old_price != null) product.oldPrice = row.old_price;
+    if (row.badge) product.badge = row.badge;
+    return product;
+  });
+}
+export async function placeEnquiry(name: string, phone: string, items: { product_id: number; quantity: number }[]) {
+  if (!supabase) return null;
+  const { data, error } = await supabase.rpc('place_enquiry', { buyer_name: name, buyer_phone: phone, buyer_note: '', items });
+  if (error) throw new Error(error.message);
+  return data as string;
 }
 export function filterProducts(category: string, query: string, deals = false, subcategory = '', source: Product[] = products) {
   return source.filter(p => {

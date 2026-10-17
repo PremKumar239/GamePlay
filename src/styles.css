@@ -177,13 +177,14 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .nav-link:hover,.nav-link.is-active { color:var(--primary); }
 .store-nav { position:relative; }
 .mega-backdrop { position:fixed; inset:0; z-index:30; border:0; background:transparent; }
-.mega-menu { position:absolute; left:0; right:0; top:100%; z-index:40; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px 24px; padding:22px 16px; background:var(--background); color:var(--foreground); border-bottom:1px solid var(--border); box-shadow:0 16px 40px color-mix(in oklch,var(--ink) 12%,transparent); }
-.mega-head { display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800; }
+.mega-menu { position:absolute; left:0; right:0; top:100%; z-index:40; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); align-items:start; gap:1lh 24px; padding:10px 16px 12px; background:var(--background); color:var(--foreground); border-bottom:1px solid var(--border); box-shadow:0 16px 40px color-mix(in oklch,var(--ink) 12%,transparent); font-size:13px; line-height:1.15; }
+.mega-head { display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800; line-height:1.15; }
+.mega-head a,.mega-subs a { display:block; margin:0; padding:0; line-height:1.15; }
 .mega-head a:hover { color:var(--primary); }
 .mega-toggle { display:none; }
-.mega-subs { display:flex; flex-direction:column; gap:6px; margin-top:8px; font-size:12px; font-weight:600; color:var(--muted-foreground); }
+.mega-subs { display:flex; flex-direction:column; gap:0; margin-top:0; font-size:12px; font-weight:600; line-height:1.15; color:var(--muted-foreground); }
 .mega-subs a:hover { color:var(--primary); }
-.mega-all { grid-column:1/-1; font-size:12px; font-weight:800; color:var(--primary); }
+.mega-all { grid-column:1/-1; margin:0; font-size:12px; font-weight:800; line-height:1.15; color:var(--primary); }
 .crumbs { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:14px; font-size:12px; color:var(--muted-foreground); }
 .crumbs a:hover { color:var(--primary); }
 .catalog-board { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }

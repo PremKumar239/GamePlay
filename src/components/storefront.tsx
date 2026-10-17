@@ -13,6 +13,7 @@ import robloxGift from '@/assets/gift-roblox.jpg';
 import pcGift from '@/assets/gift-pc.jpg';
 import gtaBanner from '@/assets/gta6-banner.jpg';
 import metroBanner from '@/assets/metro-banner.jpg';
+import gameplayBanner from '@/assets/gameplay-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
@@ -75,14 +76,14 @@ function WhatsHot() {
 }
 function Hero() {
   const [slide,setSlide] = useState(0);
-  const slides = [{image:metroBanner,alt:'Metro 2026, pre-order now'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026'}];
+  const slides = [{image:metroBanner,alt:'Metro 2026, pre-order now',category:'Games'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026',category:'Games'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026',category:'Games'}, {image:gameplayBanner,alt:'Game Play, your ultimate gaming hub',category:'All'}];
   useEffect(() => {
     const id = window.setTimeout(() => setSlide(currentSlide => (currentSlide + 1) % slides.length), 3000);
     return () => window.clearTimeout(id);
   }, [slide, slides.length]);
   const current=slides[slide];
   if (!current) return null;
-  return <section className="hero" aria-roledescription="carousel">{slides.map((item,index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index===slide ? ' is-active' : ''}`} width={1024} height={360} fetchPriority={index===0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={{category:'Games',q:'',deals:false}} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_,i)=><span key={i} className={`slide-dot ${i===slide?'active':''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={()=>setSlide((slide+slides.length-1)%slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={()=>setSlide((slide+1)%slides.length)}><ChevronRight /></Button></div></section>;
+  return <section className="hero" aria-roledescription="carousel">{slides.map((item,index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index===slide ? ' is-active' : ''}`} width={1024} height={360} fetchPriority={index===0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={{category:current.category,q:'',deals:false}} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_,i)=><span key={i} className={`slide-dot ${i===slide?'active':''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={()=>setSlide((slide+slides.length-1)%slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={()=>setSlide((slide+1)%slides.length)}><ChevronRight /></Button></div></section>;
 }
 function Benefits() { return <div className="benefits">{[{icon:ShieldCheck,title:'Shop with Confidence',copy:'Quality gaming essentials'},{icon:Gamepad2,title:'Everything Gaming',copy:'Consoles, games & accessories'},{icon:Headphones,title:'Expert Advice',copy:'Real gamers. Real support.'},{icon:MapPin,title:'Visit Our Store',copy:'Bahria Town, Lahore'}].map(b=><div className="benefit" key={b.title}><b.icon /><div><strong>{b.title}</strong><span>{b.copy}</span></div></div>)}</div>; }
 function Promo({image,eyebrow,title,category}:{image:string;eyebrow:string;title:React.ReactNode;category:string}) { return <section className="promo-banner"><img src={image} className="banner-image" alt={category==='Games'?'Samurai adventure gaming artwork':'Gaming headset, mouse and keyboard'} width={1152} height={576} loading="lazy" /><div className="promo-copy"><span className="eyebrow text-[9px]">{eyebrow}</span><h2>{title}</h2><Button asChild variant="banner" size="sm"><Link to="/shop" search={{category,q:'',deals:false}}>Shop Now <ArrowRight /></Link></Button></div></section>; }

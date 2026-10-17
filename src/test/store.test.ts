@@ -12,4 +12,7 @@ describe('Shopping interactions', () => {
   it('filters consoles and matching product name', () => expect(filterProducts('Consoles', 'PlayStation').map(p => p.id)).toEqual([1]));
   it('excludes products without an offer when offers are selected', () => expect(filterProducts('All', '', true).map(p => p.id)).toEqual([1,2,5,8]));
   it('totals item quantities', () => expect(cartTotal({1:2,2:1})).toBe(359997));
+  it('keeps PlayStation games separate from other groups', () => expect(filterProducts('PlayStation', '', false, 'Games').map(p => p.id)).toEqual([7]));
+  it('lists every PlayStation product when the subcategory is open', () => expect(filterProducts('PlayStation', '').map(p => p.id)).toEqual([1, 2, 7, 8]));
+  it('leaves an empty category empty', () => expect(filterProducts('Laptop', '', false, 'Mac')).toEqual([]));
 });

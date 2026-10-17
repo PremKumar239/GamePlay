@@ -4,6 +4,7 @@ import { Storefront } from '@/components/storefront';
 export const Route = createFileRoute('/shop')({
   validateSearch: (search: Record<string, unknown>) => ({
     category: typeof search['category'] === 'string' ? search['category'] : 'All',
+    sub: typeof search['sub'] === 'string' ? search['sub'] : '',
     q: typeof search['q'] === 'string' ? search['q'] : '',
     deals: search['deals'] === true || search['deals'] === 'true',
   }),
@@ -17,4 +18,4 @@ export const Route = createFileRoute('/shop')({
   ] }),
   component: Shop,
 });
-function Shop() { const search = Route.useSearch(); return <Storefront page="shop" initialCategory={search.category} initialQuery={search.q} initialDeals={search.deals} />; }
+function Shop() { const search = Route.useSearch(); return <Storefront page="shop" initialCategory={search.category} initialSub={search.sub} initialQuery={search.q} initialDeals={search.deals} />; }

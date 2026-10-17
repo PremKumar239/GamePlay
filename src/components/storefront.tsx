@@ -12,7 +12,7 @@ import steamGift from '@/assets/gift-steam.jpg';
 import robloxGift from '@/assets/gift-roblox.jpg';
 import pcGift from '@/assets/gift-pc.jpg';
 import gtaBanner from '@/assets/gta6-banner.jpg';
-import gameplayBanner from '@/assets/gameplay-banner.jpg';
+import metroBanner from '@/assets/metro-banner.jpg';
 import { business, categories, products, money, filterProducts, cartTotal, mapUrl, whatsapp, type Product } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
@@ -75,7 +75,7 @@ function WhatsHot() {
 }
 function Hero() {
   const [slide,setSlide] = useState(0);
-  const slides = [{image:gameplayBanner,alt:'Game Play, your ultimate gaming hub'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026'}];
+  const slides = [{image:metroBanner,alt:'Metro 2026, pre-order now'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026'}];
   useEffect(() => {
     const id = window.setTimeout(() => setSlide(currentSlide => (currentSlide + 1) % slides.length), 3000);
     return () => window.clearTimeout(id);

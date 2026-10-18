@@ -8,6 +8,11 @@ import codBanner from '@/assets/cod-banner.png';
 import gtaBanner from '@/assets/gta6-banner.png';
 import metroBanner from '@/assets/metro-banner.webp';
 import gameplayBanner from '@/assets/gameplay-banner.jpg';
+import giftBannerXbox from '@/assets/gift-banner-xbox.jpg';
+import giftBannerApple from '@/assets/gift-banner-apple.jpg';
+import giftBannerMix from '@/assets/gift-banner-mix.jpg';
+import giftBannerDepot from '@/assets/gift-banner-depot.jpg';
+import giftBannerSteam from '@/assets/gift-banner-steam.jpg';
 import { HomeShowcases } from '@/components/product-showcase';
 import { business, catalog, defaultFacts, giftAmounts, giftBrands, products, money, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
@@ -87,42 +92,48 @@ function SectionHeading({title,link,to}:{title:string;link?:string;to?:'/'|'/cat
 function Breadcrumb({category,subcategory}:{category:string;subcategory:string}) { return <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span>{category === 'All' ? <span>Products</span> : <Link to="/shop" search={shopSearch()}>Products</Link>}{category !== 'All' && <><span aria-hidden="true">/</span><Link to="/categories">Categories</Link><span aria-hidden="true">/</span>{subcategory ? <Link to="/shop" search={shopSearch(category)}>{category}</Link> : <span>{category}</span>}</>}{subcategory && <><span aria-hidden="true">/</span><span>{subcategory}</span></>}</nav>; }
 function CategoryDirectory({ groups }: { groups: CatalogGroup[] }) { return <section className="section store-container"><nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>Categories</span></nav><SectionHeading title="Categories" /><div className="catalog-board">{groups.map(group => <article className="catalog-card" key={group.name}>{group.image ? <img src={group.image} alt="" width={180} height={120} /> : <span className="catalog-mark">{group.name.slice(0, 2)}</span>}<div><h3>{group.name}</h3><p>{group.label}</p><Link className="catalog-view" to="/shop" search={shopSearch(group.name)}>View {group.name} products</Link>{group.subcategories.length > 0 && <div className="sub-list">{group.subcategories.map(sub => <Link key={sub} to="/shop" search={shopSearch(group.name, sub)}>{sub}</Link>)}</div>}</div></article>)}</div></section>; }
 function AboutSection({ facts }: { facts: StoreFacts }) { return <section className="section store-container"><nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>About Us</span></nav><SectionHeading title="About Us" /><div className="about-copy"><p>Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><p>{facts.name} is at {facts.address}. The store is rated {business.rating}/5 from {business.reviews} customer reviews and closes at {facts.closingTime}.</p><p>Call {facts.phone} to confirm today's hours, stock and prices. Orders on this site are WhatsApp enquiries.</p><Button asChild variant="dark"><Link to="/contact">Contact Us <ArrowRight /></Link></Button></div></section>; }
+const giftBannerSlides = [
+  { image: giftBannerXbox, alt: 'Xbox gift cards', category: 'Gift Cards', sub: 'Xbox', width: 1024, height: 254 },
+  { image: giftBannerApple, alt: 'Apple gift cards', category: 'Gift Cards', sub: 'Apple', width: 1024, height: 256 },
+  { image: giftBannerMix, alt: 'Gift cards at GAME PLAY', category: 'Gift Cards', width: 1024, height: 256 },
+  { image: giftBannerDepot, alt: 'Premium digital gift cards', category: 'Gift Cards', width: 1024, height: 256 },
+  { image: giftBannerSteam, alt: 'Steam gift cards', category: 'Gift Cards', sub: 'Steam', width: 1024, height: 256 },
+] as const;
 function GiftCards({ subcategory = '' }: { subcategory?: string; ask: (text: string) => string }) {
   return <section className="section store-container gift-section" aria-label="Gift Cards">
-    <div className="gift-banners">
-      <article className="gift-banner">
-        <img src={gamesBanner} alt="" />
-        <div><span>GIFT CARDS</span><h2>Pick a brand</h2><p>PlayStation, Steam, Xbox, Nintendo and more. Every card price is in PKR.</p></div>
-      </article>
-      <article className="gift-banner">
-        <img src={accessoriesBanner} alt="" />
-        <div><span>LAHORE STORE</span><h2>Ask before you pay</h2><p>Choose a value, then message GAME PLAY. The store confirms the code and the current price.</p></div>
-      </article>
-    </div>
+    <BannerCarousel slides={giftBannerSlides} />
     <SectionHeading title="Gift Cards" />
-    <div className="gift-brand-grid">{giftBrands.map(brand => <Link key={brand.name} className={`gift-brand gift-${brand.tone}${subcategory === brand.name ? ' is-active' : ''}`} to="/shop" search={shopSearch('Gift Cards', brand.name)}><span className="gift-hole" aria-hidden="true" /><strong>{brand.name}</strong><span>Gift Card</span></Link>)}</div>
+    <div className="gift-brand-grid">{giftBrands.map(brand => <Link key={brand.name} className={`gift-brand${subcategory === brand.name ? ' is-active' : ''}`} to="/shop" search={shopSearch('Gift Cards', brand.name)} aria-label={`${brand.name} Gift Card`}><img src={brand.image} alt="" />{brand.name === 'Nintendo eShop' && <span className="gift-overlay">Nintendo eShop</span>}</Link>)}</div>
     <p className="gift-note">Sample prices in PKR. GAME PLAY confirms the card and the price on WhatsApp.</p>
   </section>;
 }
 function GiftSkus({ brand, ask }: { brand: string; ask: (text: string) => string }) {
-  const tone = giftBrands.find(item => item.name === brand)?.tone;
-  if (!brand || !tone) return <p className="py-6 text-sm text-muted-foreground">Choose a gift card brand above to see every card value.</p>;
-  return <div className="gift-shop-grid">{giftAmounts.map(amount => <a key={amount} className="gift-sku" href={ask(`Hi GAME PLAY! I would like a ${brand} gift card for ${money(amount)}.`)} target="_blank" rel="noreferrer"><span className={`gift-face gift-${tone}`}><span className="gift-hole" aria-hidden="true" /><span className="gift-ribbon">{money(amount)}</span><strong>{brand}</strong><span>Gift Card</span></span><h3>{brand} Gift Card {money(amount)}</h3><p className="gift-price">{money(amount)}</p><p className="gift-status">Ask the store</p></a>)}</div>;
+  const card = giftBrands.find(item => item.name === brand);
+  if (!brand || !card) return <p className="py-6 text-sm text-muted-foreground">Choose a gift card brand above to see every card value.</p>;
+  return <div className="gift-shop-grid">{giftAmounts.map(amount => <a key={amount} className="gift-sku" href={ask(`Hi GAME PLAY! I would like a ${brand} gift card for ${money(amount)}.`)} target="_blank" rel="noreferrer"><span className="gift-face"><img src={card.image} alt="" /><span className="gift-ribbon">{money(amount)}</span>{brand === 'Nintendo eShop' && <span className="gift-overlay">Nintendo eShop</span>}</span><h3>{brand} Gift Card {money(amount)}</h3><p className="gift-price">{money(amount)}</p><p className="gift-status">Ask the store</p></a>)}</div>;
 }
 function WhatsHot({ products: picksSource }: { products: Product[] }) {
   const picks = [1, 2, 7].map(id => picksSource.find(p => p.id === id)).filter((p): p is Product => Boolean(p));
   return <section className="section store-container" aria-label="What's Hot"><SectionHeading title="What's Hot" /><div className="hot-grid">{picks.map(p => <article className="hot-card" key={p.id}><p className="hot-kicker">{p.category}</p><h3>{p.name}</h3><img src={p.image} alt={p.name} width={320} height={220} /><Button asChild variant="banner" size="sm" className="hot-pill"><Link to="/shop" search={shopSearch(p.group ?? p.category, p.subcategory ?? '')}>Shop from {money(p.price)}</Link></Button></article>)}</div></section>;
 }
-function Hero() {
-  const [slide,setSlide] = useState(0);
-  const slides = [{image:metroBanner,alt:'Metro 2039, pre-order now',category:'Games'}, {image:gtaBanner,alt:'Grand Theft Auto VI, May 26, 2026',category:'Games'}, {image:codBanner,alt:'Call of Duty Modern Warfare, October 23, 2026',category:'Games'}, {image:gameplayBanner,alt:'Game Play, your ultimate gaming hub',category:'All'}];
+type BannerSlide = { image: string; alt: string; category: string; sub?: string; width?: number; height?: number };
+function BannerCarousel({ slides }: { slides: readonly BannerSlide[] }) {
+  const [slide, setSlide] = useState(0);
   useEffect(() => {
     const id = window.setTimeout(() => setSlide(currentSlide => (currentSlide + 1) % slides.length), 3000);
     return () => window.clearTimeout(id);
   }, [slide, slides.length]);
-  const current=slides[slide];
+  const current = slides[slide];
   if (!current) return null;
-  return <section className="hero" aria-roledescription="carousel">{slides.map((item,index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index===slide ? ' is-active' : ''}`} width={1024} height={360} fetchPriority={index===0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={shopSearch(current.category)} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_,i)=><span key={i} className={`slide-dot ${i===slide?'active':''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={()=>setSlide((slide+slides.length-1)%slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={()=>setSlide((slide+1)%slides.length)}><ChevronRight /></Button></div></section>;
+  return <section className="hero" aria-roledescription="carousel">{slides.map((item, index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index === slide ? ' is-active' : ''}`} width={item.width ?? 1024} height={item.height ?? 256} fetchPriority={index === 0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={shopSearch(current.category, current.sub ?? '')} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_, i) => <span key={i} className={`slide-dot ${i === slide ? 'active' : ''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={() => setSlide((slide + slides.length - 1) % slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={() => setSlide((slide + 1) % slides.length)}><ChevronRight /></Button></div></section>;
+}
+function Hero() {
+  return <BannerCarousel slides={[
+    { image: metroBanner, alt: 'Metro 2039, pre-order now', category: 'Games', width: 1024, height: 360 },
+    { image: gtaBanner, alt: 'Grand Theft Auto VI, May 26, 2026', category: 'Games', width: 1024, height: 360 },
+    { image: codBanner, alt: 'Call of Duty Modern Warfare, October 23, 2026', category: 'Games', width: 1024, height: 360 },
+    { image: gameplayBanner, alt: 'Game Play, your ultimate gaming hub', category: 'All', width: 1024, height: 360 },
+  ]} />;
 }
 function Benefits() { return <div className="benefits">{[{icon:ShieldCheck,title:'Shop with Confidence',copy:'Quality gaming essentials'},{icon:Gamepad2,title:'Everything Gaming',copy:'Consoles, games & accessories'},{icon:Headphones,title:'Expert Advice',copy:'Real gamers. Real support.'},{icon:MapPin,title:'Visit Our Store',copy:'Bahria Town, Lahore'}].map(b=><div className="benefit" key={b.title}><b.icon /><div><strong>{b.title}</strong><span>{b.copy}</span></div></div>)}</div>; }
 function Promo({image,eyebrow,title,category}:{image:string;eyebrow:string;title:React.ReactNode;category:string}) { return <section className="promo-banner"><img src={image} className="banner-image" alt={category==='Games'?'Samurai adventure gaming artwork':'Gaming headset, mouse and keyboard'} width={1152} height={576} loading="lazy" /><div className="promo-copy"><span className="eyebrow text-[9px]">{eyebrow}</span><h2>{title}</h2><Button asChild variant="banner" size="sm"><Link to="/shop" search={shopSearch(category)}>Shop Now <ArrowRight /></Link></Button></div></section>; }

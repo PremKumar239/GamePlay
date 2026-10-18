@@ -7,6 +7,13 @@ import handheldImage from '@/assets/product-5.jpg';
 import gameImage from '@/assets/games-banner.jpg';
 import xboxImage from '@/assets/gift-xbox.jpg';
 import giftImage from '@/assets/gift-playstation.jpg';
+import appleCard from '@/assets/gift-card-apple.jpg';
+import playstationCard from '@/assets/gift-card-playstation.jpg';
+import xboxCard from '@/assets/gift-card-xbox.jpg';
+import nintendoCard from '@/assets/gift-card-nintendo.jpg';
+import steamCard from '@/assets/gift-card-steam.jpg';
+import itunesCard from '@/assets/gift-card-itunes.jpg';
+import robloxCard from '@/assets/gift-card-roblox.jpg';
 import { supabase } from '@/lib/supabase';
 
 const productImages: Record<string, string> = {
@@ -53,15 +60,15 @@ export const catalog: CatalogGroup[] = [
   { name: 'Laptop', label: 'Mac computers', subcategories: ['Mac'] },
   { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: giftImage, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
 ];
-export type GiftBrand = { name: string; tone: string };
+export type GiftBrand = { name: string; tone: string; image: string };
 export const giftBrands: GiftBrand[] = [
-  { name: 'Apple', tone: 'apple' },
-  { name: 'PlayStation', tone: 'ps' },
-  { name: 'Xbox', tone: 'xbox' },
-  { name: 'Nintendo eShop', tone: 'nintendo' },
-  { name: 'Steam', tone: 'steam' },
-  { name: 'iTunes', tone: 'itunes' },
-  { name: 'Roblox', tone: 'roblox' },
+  { name: 'Apple', tone: 'apple', image: appleCard },
+  { name: 'PlayStation', tone: 'ps', image: playstationCard },
+  { name: 'Xbox', tone: 'xbox', image: xboxCard },
+  { name: 'Nintendo eShop', tone: 'nintendo', image: nintendoCard },
+  { name: 'Steam', tone: 'steam', image: steamCard },
+  { name: 'iTunes', tone: 'itunes', image: itunesCard },
+  { name: 'Roblox', tone: 'roblox', image: robloxCard },
 ];
 export const giftAmounts = [1500, 3000, 5000, 8000, 12000, 20000, 35000];
 export const shopSearch = (category = 'All', sub = '', q = '', deals = false) => ({ category, sub, q, deals });

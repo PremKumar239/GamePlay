@@ -259,7 +259,9 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .gift-nintendo { background:linear-gradient(160deg,#c1121f,#8d0b14); }
 .gift-steam { background:linear-gradient(160deg,#1b2838,#31465f); }
 .gift-roblox { background:linear-gradient(160deg,#202020,#3a3a3a); }
-.gift-pc { background:linear-gradient(160deg,#312e81,#4f46e5); }
+.gift-apple { background:linear-gradient(160deg,#111111,#3f3f46); }
+.gift-itunes { background:linear-gradient(160deg,#14532d,#16a34a); }
+.gift-mark { display:grid; aspect-ratio:4/3; place-items:center; padding:16px; font-family:var(--font-display); font-size:42px; line-height:.95; text-align:center; }
 .product-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
 .product-card { border:1px solid var(--border); border-radius:4px; position:relative; padding:16px; transition:transform .25s,box-shadow .25s; background:var(--card); }
 .product-card:hover { transform:translateY(-5px); box-shadow:0 12px 26px color-mix(in oklch,var(--ink) 7%,transparent); }

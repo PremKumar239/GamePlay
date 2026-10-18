@@ -110,9 +110,9 @@ values
   ('Xbox', 'Controllers, consoles and accessories', 2),
   ('Meta', 'Consoles and accessories', 3),
   ('Nintendo', 'Games, controllers, consoles and accessories', 4),
-  ('Mobiles', 'Apple, Samsung, Mi and accessories', 5),
+  ('Mobiles', 'Apple, Samsung, Mi, Vivo, OPPO and accessories', 5),
   ('Laptop', 'Mac computers', 6),
-  ('Gift Cards', 'Ask the store about available cards', 7)
+  ('Gift Cards', 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', 7)
 on conflict (name) do update set label = excluded.label, sort_order = excluded.sort_order;
 
 insert into public.subcategories (category_id, name, sort_order)
@@ -134,8 +134,17 @@ from (values
   ('Mobiles', 'Apple', 1),
   ('Mobiles', 'Samsung', 2),
   ('Mobiles', 'Mi', 3),
-  ('Mobiles', 'Accessories', 4),
-  ('Laptop', 'Mac', 1)
+  ('Mobiles', 'Vivo', 4),
+  ('Mobiles', 'OPPO', 5),
+  ('Mobiles', 'Accessories', 6),
+  ('Laptop', 'Mac', 1),
+  ('Gift Cards', 'Apple', 1),
+  ('Gift Cards', 'PlayStation', 2),
+  ('Gift Cards', 'Xbox', 3),
+  ('Gift Cards', 'Nintendo eShop', 4),
+  ('Gift Cards', 'Steam', 5),
+  ('Gift Cards', 'iTunes', 6),
+  ('Gift Cards', 'Roblox', 7)
 ) as s(category_name, name, sort_order)
 join public.categories c on c.name = s.category_name
 on conflict (category_id, name) do nothing;

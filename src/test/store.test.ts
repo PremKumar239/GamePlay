@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { business, filterProducts, cartTotal, whatsapp } from '@/lib/store';
+import { business, catalog, filterProducts, cartTotal, whatsapp } from '@/lib/store';
 describe('Supplied store details', () => {
   it('preserves the supplied rating', () => expect(business.rating).toBe(4.8));
   it('preserves the supplied review count', () => expect(business.reviews).toBe(76));
@@ -15,4 +15,6 @@ describe('Shopping interactions', () => {
   it('keeps PlayStation games separate from other groups', () => expect(filterProducts('PlayStation', '', false, 'Games').map(p => p.id)).toEqual([7]));
   it('lists every PlayStation product when the subcategory is open', () => expect(filterProducts('PlayStation', '').map(p => p.id)).toEqual([1, 2, 7, 8]));
   it('leaves an empty category empty', () => expect(filterProducts('Laptop', '', false, 'Mac')).toEqual([]));
+  it('lists Vivo and OPPO under Mobiles', () => expect(catalog.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']));
+  it('lists the gift card brands', () => expect(catalog.find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox']));
 });

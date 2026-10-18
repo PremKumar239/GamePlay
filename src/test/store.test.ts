@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { business, catalog, filterProducts, cartTotal, whatsapp } from '@/lib/store';
+import { business, catalog, filterProducts, cartTotal, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
 describe('Supplied store details', () => {
   it('preserves the supplied rating', () => expect(business.rating).toBe(4.8));
   it('preserves the supplied review count', () => expect(business.reviews).toBe(76));
@@ -7,6 +7,8 @@ describe('Supplied store details', () => {
   it('preserves the supplied phone number', () => expect(business.phone).toBe('0323 5551600'));
   it('preserves the supplied address', () => expect(business.address).toBe('1st Floor, 66B, Sector C Commercial Area, Bahria Town, Lahore, 56000, Pakistan'));
   it('uses the supplied phone for enquiries', () => expect(whatsapp('Hello')).toBe('https://wa.me/923235551600?text=Hello'));
+  it('builds a call link from the local phone number', () => expect(phoneLink('0323 5551600')).toBe('tel:+923235551600'));
+  it('builds a WhatsApp link from a stored number', () => expect(whatsappTo('923235551600', 'Hello')).toBe('https://wa.me/923235551600?text=Hello'));
 });
 describe('Shopping interactions', () => {
   it('filters consoles and matching product name', () => expect(filterProducts('Consoles', 'PlayStation').map(p => p.id)).toEqual([1]));
@@ -17,4 +19,9 @@ describe('Shopping interactions', () => {
   it('leaves an empty category empty', () => expect(filterProducts('Laptop', '', false, 'Mac')).toEqual([]));
   it('lists Vivo and OPPO under Mobiles', () => expect(catalog.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']));
   it('lists the gift card brands', () => expect(catalog.find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox']));
+  it('keeps local subcategories when the database catalog is older', () => {
+    const merged = mergeCatalog([{ name: 'Mobiles', label: 'Phones', subcategories: ['Apple'] }, { name: 'Cameras', label: 'Photo', subcategories: ['Lenses'] }]);
+    expect(merged.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']);
+    expect(merged.some(group => group.name === 'Cameras')).toBe(true);
+  });
 });

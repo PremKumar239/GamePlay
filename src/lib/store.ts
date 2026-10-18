@@ -28,8 +28,14 @@ export const business = {
   phone: '0323 5551600', closingTime: '11:30 PM',
 };
 export const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name} ${business.address}`)}`;
-export const whatsapp = (text: string) => `https://wa.me/923235551600?text=${encodeURIComponent(text)}`;
-export type Product = { id: number; name: string; category: string; image: string; price: number; oldPrice?: number; badge?: string; group?: string; subcategory?: string };
+export const whatsapp = (text: string) => whatsappTo('923235551600', text);
+export const whatsappTo = (number: string, text: string) => `https://wa.me/${internationalNumber(number)}?text=${encodeURIComponent(text)}`;
+export const phoneLink = (phone: string) => `tel:+${internationalNumber(phone)}`;
+function internationalNumber(value: string) {
+  const digits = value.replace(/\D/g, '');
+  return digits.startsWith('0') ? `92${digits.slice(1)}` : digits;
+}
+export type Product = { id: number; name: string; category: string; image: string; price: number; oldPrice?: number; badge?: string; group?: string; subcategory?: string; description?: string; stock?: number };
 export const products: Product[] = [
   { id: 1, name: 'PlayStation 5 Slim — Disc Edition, 1TB', category: 'Consoles', group: 'PlayStation', subcategory: 'Consoles', image: consoleImage, price: 169999, oldPrice: 179999, badge: 'BEST SELLER' },
   { id: 2, name: 'DualSense Wireless Controller — White', category: 'Controllers', group: 'PlayStation', subcategory: 'Controllers', image: controllerImage, price: 19999, oldPrice: 22499, badge: 'HOT DEAL' },
@@ -70,14 +76,17 @@ export const categories = [
   { name: 'Mice', label: 'Precision meets speed', image: mouseImage },
 ];
 export const money = (value: number) => `Rs. ${value.toLocaleString('en-PK')}`;
-type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; image_url?: string | null; price: number; old_price: number | null; badge: string | null };
+type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; image_url?: string | null; price: number; old_price: number | null; badge: string | null; description?: string | null; stock?: number | null };
 export async function loadProductsFromDatabase(): Promise<Product[] | null> {
-  if (!supabase) return null;
-  const withUploads = await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge').order('id');
-  const result = withUploads.error ? await supabase.from('products').select('id,name,category,group_name,subcategory,image_key,price,old_price,badge').order('id') : withUploads;
+  const db = supabase;
+  if (!db) return null;
+  const read = (columns: string) => db.from('products').select(columns).order('id');
+  let result = await read('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge,description,stock');
+  if (result.error) result = await read('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge');
+  if (result.error) result = await read('id,name,category,group_name,subcategory,image_key,price,old_price,badge');
   const { data, error } = result;
   if (error || !data?.length) return null;
-  return (data as ProductRow[]).map(row => {
+  return (data as unknown as ProductRow[]).map(row => {
     const product: Product = {
       id: row.id,
       name: row.name,
@@ -89,8 +98,60 @@ export async function loadProductsFromDatabase(): Promise<Product[] | null> {
     if (row.subcategory) product.subcategory = row.subcategory;
     if (row.old_price != null) product.oldPrice = row.old_price;
     if (row.badge) product.badge = row.badge;
+    if (row.description) product.description = row.description;
+    if (typeof row.stock === 'number') product.stock = row.stock;
     return product;
   });
+}
+type CategoryRow = { id: number; name: string; label: string | null; sort_order: number };
+type SubcategoryRow = { category_id: number; name: string; sort_order: number };
+export function mergeCatalog(remote: CatalogGroup[] | null) {
+  if (!remote?.length) return catalog;
+  const byName = new Map(remote.map(group => [group.name, group]));
+  const merged = catalog.map(local => {
+    const remoteGroup = byName.get(local.name);
+    if (!remoteGroup) return local;
+    const subcategories = [...remoteGroup.subcategories];
+    for (const sub of local.subcategories) if (!subcategories.includes(sub)) subcategories.push(sub);
+    const group: CatalogGroup = { name: local.name, label: remoteGroup.label || local.label, subcategories };
+    const image = local.image ?? remoteGroup.image;
+    if (image) group.image = image;
+    return group;
+  });
+  for (const group of remote) if (!catalog.some(local => local.name === group.name)) merged.push(group);
+  return merged;
+}
+export async function loadCatalogFromDatabase(): Promise<CatalogGroup[] | null> {
+  if (!supabase) return null;
+  const categories = await supabase.from('categories').select('id,name,label,sort_order').order('sort_order');
+  if (categories.error || !categories.data?.length) return null;
+  const subs = await supabase.from('subcategories').select('category_id,name,sort_order').order('sort_order');
+  if (subs.error) return null;
+  const images = new Map(catalog.map(group => [group.name, group.image]));
+  return (categories.data as CategoryRow[]).map(row => {
+    const group: CatalogGroup = {
+      name: row.name,
+      label: row.label || '',
+      subcategories: ((subs.data ?? []) as SubcategoryRow[]).filter(sub => sub.category_id === row.id).sort((a, b) => a.sort_order - b.sort_order).map(sub => sub.name),
+    };
+    const image = images.get(row.name);
+    if (image) group.image = image;
+    return group;
+  });
+}
+export type StoreFacts = { name: string; phone: string; whatsappNumber: string; address: string; closingTime: string };
+export const defaultFacts: StoreFacts = { name: business.name, phone: business.phone, whatsappNumber: '923235551600', address: business.address, closingTime: business.closingTime };
+export async function loadStoreFacts(): Promise<StoreFacts | null> {
+  if (!supabase) return null;
+  const result = await supabase.from('store_settings').select('store_name,phone,whatsapp_number,address,closing_time').eq('id', 1).maybeSingle();
+  if (result.error || !result.data) return null;
+  return {
+    name: result.data.store_name || business.name,
+    phone: result.data.phone || business.phone,
+    whatsappNumber: result.data.whatsapp_number || defaultFacts.whatsappNumber,
+    address: result.data.address || business.address,
+    closingTime: result.data.closing_time || business.closingTime,
+  };
 }
 export async function placeEnquiry(name: string, phone: string, items: { product_id: number; quantity: number }[]) {
   if (!supabase) return null;

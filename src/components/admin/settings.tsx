@@ -52,7 +52,7 @@ export function SettingsPage() {
 
   return (
     <section>
-      <AdminHeader title="Settings" text="Store details used by the admin panel, plus sign-out for this browser." />
+      <AdminHeader title="Settings" text="Store details shown on the website, plus sign-out for this browser." />
       {error && <AdminNotice>{error}</AdminNotice>}
       {notice && <AdminNotice tone="ok">{notice}</AdminNotice>}
       {form && (

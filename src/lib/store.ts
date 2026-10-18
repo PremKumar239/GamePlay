@@ -51,21 +51,17 @@ export const catalog: CatalogGroup[] = [
   { name: 'Nintendo', label: 'Games, controllers, consoles and accessories', image: handheldImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
   { name: 'Mobiles', label: 'Apple, Samsung, Mi, Vivo, OPPO and accessories', subcategories: ['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories'] },
   { name: 'Laptop', label: 'Mac computers', subcategories: ['Mac'] },
-  { name: 'Gift Cards', label: 'PlayStation, iTunes, Xbox, Google Play, Nintendo eShop, Steam, Roblox, Razer Gold, Riot, Meta Quest and Apple', image: giftImage, subcategories: ['PlayStation', 'iTunes', 'Xbox', 'Google Play', 'Nintendo eShop', 'Steam', 'Roblox', 'Razer Gold', 'Riot', 'Meta Quest', 'Apple'] },
+  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: giftImage, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
 ];
 export type GiftBrand = { name: string; tone: string };
 export const giftBrands: GiftBrand[] = [
+  { name: 'Apple', tone: 'apple' },
   { name: 'PlayStation', tone: 'ps' },
-  { name: 'iTunes', tone: 'itunes' },
   { name: 'Xbox', tone: 'xbox' },
-  { name: 'Google Play', tone: 'play' },
   { name: 'Nintendo eShop', tone: 'nintendo' },
   { name: 'Steam', tone: 'steam' },
+  { name: 'iTunes', tone: 'itunes' },
   { name: 'Roblox', tone: 'roblox' },
-  { name: 'Razer Gold', tone: 'razer' },
-  { name: 'Riot', tone: 'riot' },
-  { name: 'Meta Quest', tone: 'meta' },
-  { name: 'Apple', tone: 'apple' },
 ];
 export const giftAmounts = [1500, 3000, 5000, 8000, 12000, 20000, 35000];
 export const shopSearch = (category = 'All', sub = '', q = '', deals = false) => ({ category, sub, q, deals });
@@ -113,9 +109,9 @@ export function mergeCatalog(remote: CatalogGroup[] | null) {
   const merged = catalog.map(local => {
     const remoteGroup = byName.get(local.name);
     if (!remoteGroup) return local;
-    const subcategories = [...remoteGroup.subcategories];
+    const subcategories = local.name === 'Gift Cards' ? remoteGroup.subcategories.filter(sub => local.subcategories.includes(sub)) : [...remoteGroup.subcategories];
     for (const sub of local.subcategories) if (!subcategories.includes(sub)) subcategories.push(sub);
-    const group: CatalogGroup = { name: local.name, label: remoteGroup.label || local.label, subcategories };
+    const group: CatalogGroup = { name: local.name, label: local.name === 'Gift Cards' ? local.label : remoteGroup.label || local.label, subcategories };
     const image = local.image ?? remoteGroup.image;
     if (image) group.image = image;
     return group;

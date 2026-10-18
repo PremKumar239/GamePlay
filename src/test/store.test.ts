@@ -18,7 +18,8 @@ describe('Shopping interactions', () => {
   it('lists every PlayStation product when the subcategory is open', () => expect(filterProducts('PlayStation', '').map(p => p.id)).toEqual([1, 2, 7, 8]));
   it('leaves an empty category empty', () => expect(filterProducts('Laptop', '', false, 'Mac')).toEqual([]));
   it('lists Vivo and OPPO under Mobiles', () => expect(catalog.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']));
-  it('lists the gift card brands', () => expect(catalog.find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['PlayStation', 'iTunes', 'Xbox', 'Google Play', 'Nintendo eShop', 'Steam', 'Roblox', 'Razer Gold', 'Riot', 'Meta Quest', 'Apple']));
+  it('lists the gift card brands', () => expect(catalog.find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox']));
+  it('drops gift card brands outside the store list', () => expect(mergeCatalog([{ name: 'Gift Cards', label: 'Extra brands', subcategories: ['Steam', 'Google Play', 'Razer Gold'] }]).find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Steam', 'Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'iTunes', 'Roblox']));
   it('keeps local subcategories when the database catalog is older', () => {
     const merged = mergeCatalog([{ name: 'Mobiles', label: 'Phones', subcategories: ['Apple'] }, { name: 'Cameras', label: 'Photo', subcategories: ['Lenses'] }]);
     expect(merged.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']);

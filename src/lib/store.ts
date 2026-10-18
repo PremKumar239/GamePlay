@@ -7,9 +7,6 @@ import handheldImage from '@/assets/product-5.jpg';
 import gameImage from '@/assets/games-banner.jpg';
 import xboxImage from '@/assets/gift-xbox.jpg';
 import giftImage from '@/assets/gift-playstation.jpg';
-import nintendoGift from '@/assets/gift-nintendo.jpg';
-import steamGift from '@/assets/gift-steam.jpg';
-import robloxGift from '@/assets/gift-roblox.jpg';
 import { supabase } from '@/lib/supabase';
 
 const productImages: Record<string, string> = {
@@ -54,18 +51,23 @@ export const catalog: CatalogGroup[] = [
   { name: 'Nintendo', label: 'Games, controllers, consoles and accessories', image: handheldImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
   { name: 'Mobiles', label: 'Apple, Samsung, Mi, Vivo, OPPO and accessories', subcategories: ['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories'] },
   { name: 'Laptop', label: 'Mac computers', subcategories: ['Mac'] },
-  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: giftImage, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
+  { name: 'Gift Cards', label: 'PlayStation, iTunes, Xbox, Google Play, Nintendo eShop, Steam, Roblox, Razer Gold, Riot, Meta Quest and Apple', image: giftImage, subcategories: ['PlayStation', 'iTunes', 'Xbox', 'Google Play', 'Nintendo eShop', 'Steam', 'Roblox', 'Razer Gold', 'Riot', 'Meta Quest', 'Apple'] },
 ];
-export type GiftCardOffer = { name: string; tone: string; value: string; image?: string };
-export const giftCards: GiftCardOffer[] = [
-  { name: 'Apple', tone: 'apple', value: 'Ask the store' },
-  { name: 'PlayStation', tone: 'ps', value: 'Rs. 5,000', image: giftImage },
-  { name: 'Xbox', tone: 'xbox', value: 'Rs. 5,000', image: xboxImage },
-  { name: 'Nintendo eShop', tone: 'nintendo', value: 'Rs. 3,000', image: nintendoGift },
-  { name: 'Steam', tone: 'steam', value: 'Rs. 2,500', image: steamGift },
-  { name: 'iTunes', tone: 'itunes', value: 'Ask the store' },
-  { name: 'Roblox', tone: 'roblox', value: 'Rs. 1,500', image: robloxGift },
+export type GiftBrand = { name: string; tone: string };
+export const giftBrands: GiftBrand[] = [
+  { name: 'PlayStation', tone: 'ps' },
+  { name: 'iTunes', tone: 'itunes' },
+  { name: 'Xbox', tone: 'xbox' },
+  { name: 'Google Play', tone: 'play' },
+  { name: 'Nintendo eShop', tone: 'nintendo' },
+  { name: 'Steam', tone: 'steam' },
+  { name: 'Roblox', tone: 'roblox' },
+  { name: 'Razer Gold', tone: 'razer' },
+  { name: 'Riot', tone: 'riot' },
+  { name: 'Meta Quest', tone: 'meta' },
+  { name: 'Apple', tone: 'apple' },
 ];
+export const giftAmounts = [1500, 3000, 5000, 8000, 12000, 20000, 35000];
 export const shopSearch = (category = 'All', sub = '', q = '', deals = false) => ({ category, sub, q, deals });
 export const categories = [
   { name: 'Consoles', label: 'PlayStation & Nintendo', image: consoleImage },

@@ -193,7 +193,7 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
     const subject = name.trim() ? `GAME PLAY enquiry from ${name.trim()}` : 'GAME PLAY website enquiry';
     window.location.href = mailTo(business.email, subject, buildMessage());
   };
-  return <section id="contact" className="section store-container scroll-reveal">
+  const visitBlock = <>
     <SectionHeading title={full ? 'Visit GAME PLAY' : 'Your Local Gaming Destination'} />
     <div className="contact-grid">
       <div>
@@ -216,8 +216,11 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
       </div>
       <iframe title="GAME PLAY location in Bahria Town Lahore" src={`https://maps.google.com/maps?q=${encodeURIComponent(facts.address)}&z=15&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
     </div>
+  </>;
+  return <section id="contact" className="section store-container scroll-reveal">
     {full && <>
-      <div className="contact-form-panel">
+      <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>Contact Us</span></nav>
+      <div className="contact-form-panel is-first">
         <div className="section-heading"><h2>Send a message</h2></div>
         <p className="contact-form-lead">Ask about stock, prices, gift cards or anything else. Send on WhatsApp for the fastest reply, or open your email app.</p>
         <form className="contact-form" onSubmit={sendWhatsApp}>
@@ -237,7 +240,9 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
         <p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} customers.</p>
         <Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Read Reviews on Google Maps <ArrowUpRight /></a></Button>
       </div>
+      <div className="contact-visit-last">{visitBlock}</div>
     </>}
+    {!full && visitBlock}
   </section>;
 }
 function Footer({ groups, facts, directions, ask }: { groups: CatalogGroup[]; facts: StoreFacts; directions: string; ask: (text: string) => string }) { return <footer className="footer"><div className="store-container footer-grid"><div><Brand /><p className="mt-5 max-w-xs">Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><a href={directions} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1">Find our store <ArrowUpRight size={12} /></a></div><div><h3>Shop GAME PLAY</h3>{groups.map(group => <Link className="block" key={group.name} to="/shop" search={shopSearch(group.name)}>{group.name}</Link>)}</div><div><h3>Explore</h3><Link className="block" to="/">Home</Link><Link className="block" to="/shop" search={shopSearch()}>Products</Link><Link className="block" to="/categories">Categories</Link><Link className="block" to="/shop" search={shopSearch('All', '', '', true)}>Special Offers</Link><Link className="block" to="/about">About Us</Link><Link className="block" to="/contact">Contact Us</Link><a className="block" href={directions} target="_blank" rel="noreferrer">Customer Reviews</a></div><div><h3>Get in Touch</h3><p>{facts.address}</p><a className="mt-3 block" href={phoneLink(facts.phone)}>{facts.phone}</a><p>Closes at {facts.closingTime}</p><a className="mt-3 flex items-center gap-2" href={ask('Hi GAME PLAY!')} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a></div></div><div className="footer-bottom"><div className="store-container flex flex-wrap justify-between gap-3"><span>© {new Date().getFullYear()} GAME PLAY. All rights reserved.</span><span>Made for the love of gaming.</span></div></div></footer>; }

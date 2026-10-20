@@ -4,10 +4,10 @@ import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock
 import { Button } from '@/components/ui/button';
 import gamesBanner from '@/assets/games-banner.jpg';
 import accessoriesBanner from '@/assets/accessories-banner.jpg';
-import codBanner from '@/assets/cod-banner.png';
-import gtaBanner from '@/assets/gta6-banner.png';
-import metroBanner from '@/assets/metro-banner.webp';
-import gameplayBanner from '@/assets/gameplay-banner.jpg';
+import homeBannerFc27 from '@/assets/home-banner-fc27.webp';
+import homeBannerAce from '@/assets/home-banner-ace.webp';
+import homeBannerWolverine from '@/assets/home-banner-wolverine.webp';
+import homeBannerGta6 from '@/assets/home-banner-gta6.webp';
 import giftBannerXbox from '@/assets/gift-banner-xbox.jpg';
 import giftBannerApple from '@/assets/gift-banner-apple.jpg';
 import giftBannerMix from '@/assets/gift-banner-mix.jpg';
@@ -117,7 +117,7 @@ function WhatsHot({ products: picksSource }: { products: Product[] }) {
   return <section className="section store-container" aria-label="What's Hot"><SectionHeading title="What's Hot" /><div className="hot-grid">{picks.map(p => <article className="hot-card" key={p.id}><p className="hot-kicker">{p.category}</p><h3>{p.name}</h3><img src={p.image} alt={p.name} width={320} height={220} /><Button asChild variant="banner" size="sm" className="hot-pill"><Link to="/shop" search={shopSearch(p.group ?? p.category, p.subcategory ?? '')}>Shop from {money(p.price)}</Link></Button></article>)}</div></section>;
 }
 type BannerSlide = { image: string; alt: string; category: string; sub?: string; width?: number; height?: number };
-function BannerCarousel({ slides }: { slides: readonly BannerSlide[] }) {
+function BannerCarousel({ slides, className = 'hero' }: { slides: readonly BannerSlide[]; className?: string }) {
   const [slide, setSlide] = useState(0);
   useEffect(() => {
     const id = window.setTimeout(() => setSlide(currentSlide => (currentSlide + 1) % slides.length), 3000);
@@ -125,14 +125,14 @@ function BannerCarousel({ slides }: { slides: readonly BannerSlide[] }) {
   }, [slide, slides.length]);
   const current = slides[slide];
   if (!current) return null;
-  return <section className="hero" aria-roledescription="carousel">{slides.map((item, index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index === slide ? ' is-active' : ''}`} width={item.width ?? 1024} height={item.height ?? 256} fetchPriority={index === 0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={shopSearch(current.category, current.sub ?? '')} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_, i) => <span key={i} className={`slide-dot ${i === slide ? 'active' : ''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={() => setSlide((slide + slides.length - 1) % slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={() => setSlide((slide + 1) % slides.length)}><ChevronRight /></Button></div></section>;
+  return <section className={className} aria-roledescription="carousel">{slides.map((item, index) => <img key={item.image} src={item.image} alt="" aria-hidden="true" className={`banner-image${index === slide ? ' is-active' : ''}`} width={item.width ?? 1024} height={item.height ?? 384} fetchPriority={index === 0 ? 'high' : 'low'} />)}<Link className="hero-link" to="/shop" search={shopSearch(current.category, current.sub ?? '')} aria-label={current.alt} /><div className="slide-dots" aria-hidden="true">{slides.map((_, i) => <span key={i} className={`slide-dot ${i === slide ? 'active' : ''}`} />)}</div><div className="slide-arrows"><Button variant="banner" size="icon" aria-label="Previous banner" onClick={() => setSlide((slide + slides.length - 1) % slides.length)}><ChevronLeft /></Button><Button variant="banner" size="icon" aria-label="Next banner" onClick={() => setSlide((slide + 1) % slides.length)}><ChevronRight /></Button></div></section>;
 }
 function Hero() {
-  return <BannerCarousel slides={[
-    { image: metroBanner, alt: 'Metro 2039, pre-order now', category: 'Games', width: 1024, height: 360 },
-    { image: gtaBanner, alt: 'Grand Theft Auto VI, May 26, 2026', category: 'Games', width: 1024, height: 360 },
-    { image: codBanner, alt: 'Call of Duty Modern Warfare, October 23, 2026', category: 'Games', width: 1024, height: 360 },
-    { image: gameplayBanner, alt: 'Game Play, your ultimate gaming hub', category: 'All', width: 1024, height: 360 },
+  return <BannerCarousel className="hero home-hero" slides={[
+    { image: homeBannerFc27, alt: 'EA Sports FC 27, shop now', category: 'Games', width: 1024, height: 384 },
+    { image: homeBannerAce, alt: 'Ace Combat 8, order now', category: 'Games', width: 1024, height: 384 },
+    { image: homeBannerWolverine, alt: 'Marvel Wolverine, shop now', category: 'Games', width: 1024, height: 384 },
+    { image: homeBannerGta6, alt: 'Grand Theft Auto VI, coming 19 November 2026', category: 'Games', width: 1024, height: 384 },
   ]} />;
 }
 function Benefits() { return <div className="benefits">{[{icon:ShieldCheck,title:'Shop with Confidence',copy:'Quality gaming essentials'},{icon:Gamepad2,title:'Everything Gaming',copy:'Consoles, games & accessories'},{icon:Headphones,title:'Expert Advice',copy:'Real gamers. Real support.'},{icon:MapPin,title:'Visit Our Store',copy:'Bahria Town, Lahore'}].map(b=><div className="benefit" key={b.title}><b.icon /><div><strong>{b.title}</strong><span>{b.copy}</span></div></div>)}</div>; }

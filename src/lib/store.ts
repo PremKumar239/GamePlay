@@ -166,6 +166,17 @@ export async function placeEnquiry(name: string, phone: string, items: { product
   if (error) throw new Error(error.message);
   return data as string;
 }
+export async function placeContactMessage(name: string, email: string, phone: string, message: string) {
+  if (!supabase) throw new Error('Supabase is not configured.');
+  const { data, error } = await supabase.rpc('place_contact_message', {
+    buyer_name: name,
+    buyer_email: email,
+    buyer_phone: phone,
+    buyer_message: message,
+  });
+  if (error) throw new Error(error.message);
+  return data as number;
+}
 export function filterProducts(category: string, query: string, deals = false, subcategory = '', source: Product[] = products) {
   return source.filter(p => {
     const inGroup = category !== 'All' && p.group === category;

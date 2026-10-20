@@ -14,7 +14,7 @@ import giftBannerMix from '@/assets/gift-banner-mix.jpg';
 import giftBannerDepot from '@/assets/gift-banner-depot.jpg';
 import giftBannerSteam from '@/assets/gift-banner-steam.jpg';
 import { HomeShowcases } from '@/components/product-showcase';
-import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
+import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeContactMessage, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
 export function Brand() { return <Link to="/" className="brand"><img src="/favicon.png" alt="" width={56} height={56} /><span className="brand-name">Game Play</span></Link>; }
@@ -177,6 +177,9 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [formNotice, setFormNotice] = useState('');
+  const [formError, setFormError] = useState('');
   const buildMessage = () => [
     'Hi GAME PLAY! I have a question from the website.',
     name.trim() ? `Name: ${name.trim()}` : '',
@@ -185,13 +188,42 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
     '',
     message.trim() || 'Please get back to me about stock, prices or store details.',
   ].filter(Boolean).join('\n');
-  const sendWhatsApp = (e: React.FormEvent) => {
-    e.preventDefault();
-    window.open(ask(buildMessage()), '_blank', 'noopener,noreferrer');
+  const saveMessage = async () => {
+    const text = message.trim();
+    if (!text) throw new Error('Write your question first.');
+    await placeContactMessage(name.trim(), email.trim(), phone.trim(), text);
   };
-  const sendEmail = () => {
-    const subject = name.trim() ? `GAME PLAY enquiry from ${name.trim()}` : 'GAME PLAY website enquiry';
-    window.location.href = mailTo(business.email, subject, buildMessage());
+  const sendWhatsApp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    setFormError('');
+    setFormNotice('');
+    try {
+      await saveMessage();
+      setFormNotice('Message saved for GAME PLAY. Opening WhatsApp…');
+      window.open(ask(buildMessage()), '_blank', 'noopener,noreferrer');
+      setMessage('');
+    } catch (reason) {
+      setFormError(reason instanceof Error ? reason.message : 'Could not save the message.');
+    } finally {
+      setSending(false);
+    }
+  };
+  const sendEmail = async () => {
+    setSending(true);
+    setFormError('');
+    setFormNotice('');
+    try {
+      await saveMessage();
+      setFormNotice('Message saved for GAME PLAY. Opening your email app…');
+      const subject = name.trim() ? `GAME PLAY enquiry from ${name.trim()}` : 'GAME PLAY website enquiry';
+      window.location.href = mailTo(business.email, subject, buildMessage());
+      setMessage('');
+    } catch (reason) {
+      setFormError(reason instanceof Error ? reason.message : 'Could not save the message.');
+    } finally {
+      setSending(false);
+    }
   };
   const visitBlock = <>
     <SectionHeading title={full ? 'Visit GAME PLAY' : 'Your Local Gaming Destination'} />
@@ -223,16 +255,18 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
       <div className="contact-form-panel is-first">
         <div className="section-heading"><h2>Send a message</h2></div>
         <p className="contact-form-lead">Ask about stock, prices, gift cards or anything else. Send on WhatsApp for the fastest reply, or open your email app.</p>
-        <form className="contact-form" onSubmit={sendWhatsApp}>
-          <label><span>Name</span><input name="name" autoComplete="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} /></label>
-          <label><span>Email</span><input name="email" type="email" autoComplete="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} /></label>
-          <label><span>Phone</span><input name="phone" type="tel" autoComplete="tel" placeholder="03XX XXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} /></label>
-          <label className="contact-form-message"><span>Your question</span><textarea name="message" rows={5} required placeholder="Ask about a product, gift card, store hours or anything else..." value={message} onChange={e => setMessage(e.target.value)} /></label>
+        <form className="contact-form" onSubmit={event => void sendWhatsApp(event)}>
+          <label><span>Name</span><input name="name" autoComplete="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} disabled={sending} /></label>
+          <label><span>Email</span><input name="email" type="email" autoComplete="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} disabled={sending} /></label>
+          <label><span>Phone</span><input name="phone" type="tel" autoComplete="tel" placeholder="03XX XXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} disabled={sending} /></label>
+          <label className="contact-form-message"><span>Your question</span><textarea name="message" rows={5} required placeholder="Ask about a product, gift card, store hours or anything else..." value={message} onChange={e => setMessage(e.target.value)} disabled={sending} /></label>
           <div className="contact-form-actions">
-            <Button type="submit" variant="shop"><MessageCircle /> Send on WhatsApp</Button>
-            <Button type="button" variant="outline" onClick={sendEmail}>Send by Email <ArrowUpRight /></Button>
+            <Button type="submit" variant="shop" disabled={sending}><MessageCircle /> {sending ? 'Saving…' : 'Send on WhatsApp'}</Button>
+            <Button type="button" variant="outline" disabled={sending} onClick={() => void sendEmail()}>Send by Email <ArrowUpRight /></Button>
           </div>
-          <p className="gift-note">WhatsApp opens with your message ready for {facts.phone}. Email opens your mail app to {business.email}.</p>
+          {formNotice && <p className="contact-form-ok">{formNotice}</p>}
+          {formError && <p className="contact-form-error">{formError}</p>}
+          <p className="gift-note">Your message is saved in the GAME PLAY admin panel. WhatsApp or email can still open so you can follow up with the store.</p>
         </form>
       </div>
       <div className="mt-8 border-t border-border pt-6">

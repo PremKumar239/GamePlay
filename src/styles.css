@@ -329,7 +329,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .contact-form-message { grid-column:1/-1; }
 .contact-form textarea { resize:vertical; min-height:120px; }
 .contact-form-actions { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:10px; margin-top:4px; }
-.contact-form .gift-note { grid-column:1/-1; }
+.contact-form .gift-note,.contact-form-ok,.contact-form-error { grid-column:1/-1; }
+.contact-form-ok { margin:0; color:var(--success); font-size:13px; font-weight:700; }
+.contact-form-error { margin:0; color:var(--destructive); font-size:13px; font-weight:700; }
+.admin-message-body { margin:0; white-space:pre-wrap; font-size:14px; line-height:1.6; }
 .footer { background:var(--ink); color:var(--ink-foreground); padding-top:42px; }
 .footer-grid { display:grid; grid-template-columns:1.5fr 1fr 1fr 1.3fr; gap:45px; padding-bottom:36px; }
 .footer h3 { font-size:12px; font-weight:800; margin-bottom:18px; }

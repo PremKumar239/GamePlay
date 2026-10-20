@@ -71,6 +71,19 @@ export type StoreSettings = {
   low_stock_threshold: number;
 };
 
+export const messageStatuses = ['new', 'read', 'replied', 'archived'] as const;
+export type MessageStatus = (typeof messageStatuses)[number];
+
+export type AdminContactMessage = {
+  id: number;
+  customer_name: string;
+  customer_email: string | null;
+  customer_phone: string | null;
+  message: string;
+  status: MessageStatus;
+  created_at: string;
+};
+
 export type ProductInput = {
   name: string;
   group_name: string;
@@ -194,6 +207,17 @@ export async function fetchOrders() {
 
 export async function updateOrder(id: number, status: OrderStatus, paymentStatus: PaymentStatus) {
   const result = await db().from('orders').update({ status, payment_status: paymentStatus }).eq('id', id);
+  fail(result.error);
+}
+
+export async function fetchContactMessages() {
+  const result = await db().from('contact_messages').select('id,customer_name,customer_email,customer_phone,message,status,created_at').order('created_at', { ascending: false });
+  fail(result.error);
+  return (result.data ?? []) as AdminContactMessage[];
+}
+
+export async function updateContactMessage(id: number, status: MessageStatus) {
+  const result = await db().from('contact_messages').update({ status }).eq('id', id);
   fail(result.error);
 }
 

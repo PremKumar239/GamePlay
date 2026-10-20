@@ -5,8 +5,6 @@ import keyboardImage from '@/assets/product-3.jpg';
 import mouseImage from '@/assets/product-4.jpg';
 import handheldImage from '@/assets/product-5.jpg';
 import gameImage from '@/assets/games-banner.jpg';
-import xboxImage from '@/assets/gift-xbox.jpg';
-import giftImage from '@/assets/gift-playstation.jpg';
 import appleCard from '@/assets/gift-card-apple.jpg';
 import playstationCard from '@/assets/gift-card-playstation.jpg';
 import xboxCard from '@/assets/gift-card-xbox.jpg';
@@ -54,12 +52,12 @@ export const products: Product[] = [
 export type CatalogGroup = { name: string; label: string; image?: string; subcategories: string[] };
 export const catalog: CatalogGroup[] = [
   { name: 'PlayStation', label: 'Games, controllers, consoles and accessories', image: consoleImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
-  { name: 'Xbox', label: 'Controllers, consoles and accessories', image: xboxImage, subcategories: ['Controllers', 'Consoles', 'Accessories'] },
+  { name: 'Xbox', label: 'Controllers, consoles and accessories', image: xboxCard, subcategories: ['Controllers', 'Consoles', 'Accessories'] },
   { name: 'Meta', label: 'Consoles and accessories', subcategories: ['Consoles', 'Accessories'] },
   { name: 'Nintendo', label: 'Games, controllers, consoles and accessories', image: handheldImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
   { name: 'Mobiles', label: 'Apple, Samsung, Mi, Vivo, OPPO and accessories', subcategories: ['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories'] },
   { name: 'Laptop', label: 'Mac computers', subcategories: ['Mac'] },
-  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: giftImage, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
+  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: playstationCard, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
 ];
 export type GiftBrand = { name: string; tone: string; image: string };
 export const giftBrands: GiftBrand[] = [

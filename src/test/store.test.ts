@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { business, catalog, filterProducts, cartTotal, getProduct, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
+import { business, catalog, filterProducts, cartTotal, getProduct, mailTo, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
 describe('Supplied store details', () => {
   it('preserves the supplied rating', () => expect(business.rating).toBe(4.8));
   it('preserves the supplied review count', () => expect(business.reviews).toBe(76));
@@ -9,6 +9,7 @@ describe('Supplied store details', () => {
   it('uses the supplied phone for enquiries', () => expect(whatsapp('Hello')).toBe('https://wa.me/923235551600?text=Hello'));
   it('builds a call link from the local phone number', () => expect(phoneLink('0323 5551600')).toBe('tel:+923235551600'));
   it('builds a WhatsApp link from a stored number', () => expect(whatsappTo('923235551600', 'Hello')).toBe('https://wa.me/923235551600?text=Hello'));
+  it('builds a contact email link', () => expect(mailTo(business.email, 'Hello', 'Body')).toBe(`mailto:${business.email}?subject=Hello&body=Body`));
 });
 describe('Shopping interactions', () => {
   it('filters consoles and matching product name', () => expect(filterProducts('Consoles', 'PlayStation').map(p => p.id)).toEqual([1]));

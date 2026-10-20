@@ -29,8 +29,9 @@ const productImages: Record<string, string> = {
 export const business = {
   name: 'GAME PLAY', rating: 4.8, reviews: 76,
   address: '1st Floor, 66B, Sector C Commercial Area, Bahria Town, Lahore, 56000, Pakistan',
-  phone: '0323 5551600', closingTime: '11:30 PM',
+  phone: '0323 5551600', email: 'gameplay@gmail.com', closingTime: '11:30 PM',
 };
+export const mailTo = (email: string, subject: string, body: string) => `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 export const mapUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${business.name} ${business.address}`)}`;
 export const whatsapp = (text: string) => whatsappTo('923235551600', text);
 export const whatsappTo = (number: string, text: string) => `https://wa.me/${internationalNumber(number)}?text=${encodeURIComponent(text)}`;

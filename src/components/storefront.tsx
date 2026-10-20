@@ -14,7 +14,7 @@ import giftBannerMix from '@/assets/gift-banner-mix.jpg';
 import giftBannerDepot from '@/assets/gift-banner-depot.jpg';
 import giftBannerSteam from '@/assets/gift-banner-steam.jpg';
 import { HomeShowcases } from '@/components/product-showcase';
-import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
+import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
 export function Brand() { return <Link to="/" className="brand"><img src="/favicon.png" alt="" width={56} height={56} /><span className="brand-name">Game Play</span></Link>; }
@@ -80,7 +80,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
       {page === 'categories' && <CategoryDirectory groups={groups} />}
       {page === 'about' && <AboutSection facts={facts} />}
       {page === 'home' && <div className="store-container"><div className="brand-band"><span>PlayStation.</span><span className="italic">XBOX</span><span>NINTENDO</span><span className="font-sans text-xl">logitech G</span><span>HYPERX</span><span>RAZER</span></div></div>}
-      <ContactSection full={page === 'contact'} facts={facts} directions={directions} />
+      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} />
     </main>
     <Footer groups={groups} facts={facts} directions={directions} ask={askStore} />
     <Button asChild variant="shop" className="floating-contact" title="Chat with GAME PLAY"><a href={askStore('Hi GAME PLAY! I would like to ask about your products.')} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"><MessageCircle size={24} /></a></Button>
@@ -172,5 +172,72 @@ function ProductDetail({ product, saved, onFavorite, onAdd, ask }: { product: Pr
     </div>
   </section>;
 }
-function ContactSection({ full, facts, directions }: { full: boolean; facts: StoreFacts; directions: string }) { return <section id="contact" className="section store-container scroll-reveal"><SectionHeading title={full?'Visit GAME PLAY':'Your Local Gaming Destination'} /><div className="contact-grid"><div><span className="eyebrow text-success">GAME PLAY · LAHORE</span><h3 className="mt-3 text-2xl font-extrabold">Great games. Even better company.</h3><div className="mt-5 flex items-center gap-3"><div className="flex gap-0.5 text-rating">{[1,2,3,4,5].map(s=><Star key={s} size={15} fill="currentColor" />)}</div><strong>{business.rating}/5</strong><a className="text-xs text-muted-foreground underline" href={directions} target="_blank" rel="noreferrer">{business.reviews} customer reviews</a></div><div className="contact-detail"><MapPin /><div><strong>Find us</strong><p>{facts.address}</p></div></div><div className="contact-detail"><Phone /><div><strong>Let's talk gaming</strong><p><a href={phoneLink(facts.phone)}>{facts.phone}</a></p></div></div><div className="contact-detail"><Clock3 /><div><strong className="text-success">Open · Closes at {facts.closingTime}</strong><p className="text-muted-foreground">Call to confirm today's opening hours.</p></div></div><div className="mt-5 flex gap-3"><Button asChild variant="dark" size="sm"><a href={directions} target="_blank" rel="noreferrer">Get Directions <ArrowUpRight /></a></Button><Button asChild variant="outline" size="sm"><a href={phoneLink(facts.phone)}>Call the Store <Phone /></a></Button></div></div><iframe title="GAME PLAY location in Bahria Town Lahore" src={`https://maps.google.com/maps?q=${encodeURIComponent(facts.address)}&z=15&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /></div>{full && <div className="mt-8 border-t border-border pt-6"><h3 className="mb-2 text-lg font-bold">Customer Reviews</h3><p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} customers.</p><Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Read Reviews on Google Maps <ArrowUpRight /></a></Button></div>}</section>; }
+function ContactSection({ full, facts, directions, ask }: { full: boolean; facts: StoreFacts; directions: string; ask: (text: string) => string }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [message, setMessage] = useState('');
+  const buildMessage = () => [
+    'Hi GAME PLAY! I have a question from the website.',
+    name.trim() ? `Name: ${name.trim()}` : '',
+    email.trim() ? `Email: ${email.trim()}` : '',
+    phone.trim() ? `Phone: ${phone.trim()}` : '',
+    '',
+    message.trim() || 'Please get back to me about stock, prices or store details.',
+  ].filter(Boolean).join('\n');
+  const sendWhatsApp = (e: React.FormEvent) => {
+    e.preventDefault();
+    window.open(ask(buildMessage()), '_blank', 'noopener,noreferrer');
+  };
+  const sendEmail = () => {
+    const subject = name.trim() ? `GAME PLAY enquiry from ${name.trim()}` : 'GAME PLAY website enquiry';
+    window.location.href = mailTo(business.email, subject, buildMessage());
+  };
+  return <section id="contact" className="section store-container scroll-reveal">
+    <SectionHeading title={full ? 'Visit GAME PLAY' : 'Your Local Gaming Destination'} />
+    <div className="contact-grid">
+      <div>
+        <span className="eyebrow text-success">GAME PLAY · LAHORE</span>
+        <h3 className="mt-3 text-2xl font-extrabold">Great games. Even better company.</h3>
+        <div className="mt-5 flex items-center gap-3">
+          <div className="flex gap-0.5 text-rating">{[1, 2, 3, 4, 5].map(s => <Star key={s} size={15} fill="currentColor" />)}</div>
+          <strong>{business.rating}/5</strong>
+          <a className="text-xs text-muted-foreground underline" href={directions} target="_blank" rel="noreferrer">{business.reviews} customer reviews</a>
+        </div>
+        <div className="contact-detail"><MapPin /><div><strong>Find us</strong><p>{facts.address}</p></div></div>
+        <div className="contact-detail"><Phone /><div><strong>Let's talk gaming</strong><p><a href={phoneLink(facts.phone)}>{facts.phone}</a></p></div></div>
+        <div className="contact-detail"><MessageCircle /><div><strong>WhatsApp</strong><p><a href={ask('Hi GAME PLAY!')} target="_blank" rel="noreferrer">Chat on WhatsApp</a></p></div></div>
+        <div className="contact-detail"><Clock3 /><div><strong className="text-success">Open · Closes at {facts.closingTime}</strong><p className="text-muted-foreground">Call to confirm today's opening hours.</p></div></div>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <Button asChild variant="dark" size="sm"><a href={directions} target="_blank" rel="noreferrer">Get Directions <ArrowUpRight /></a></Button>
+          <Button asChild variant="outline" size="sm"><a href={phoneLink(facts.phone)}>Call the Store <Phone /></a></Button>
+          <Button asChild variant="shop" size="sm"><a href={ask('Hi GAME PLAY! I have a question.')} target="_blank" rel="noreferrer"><MessageCircle /> WhatsApp</a></Button>
+        </div>
+      </div>
+      <iframe title="GAME PLAY location in Bahria Town Lahore" src={`https://maps.google.com/maps?q=${encodeURIComponent(facts.address)}&z=15&output=embed`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+    </div>
+    {full && <>
+      <div className="contact-form-panel">
+        <div className="section-heading"><h2>Send a message</h2></div>
+        <p className="contact-form-lead">Ask about stock, prices, gift cards or anything else. Send on WhatsApp for the fastest reply, or open your email app.</p>
+        <form className="contact-form" onSubmit={sendWhatsApp}>
+          <label><span>Name</span><input name="name" autoComplete="name" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} /></label>
+          <label><span>Email</span><input name="email" type="email" autoComplete="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} /></label>
+          <label><span>Phone</span><input name="phone" type="tel" autoComplete="tel" placeholder="03XX XXXXXXX" value={phone} onChange={e => setPhone(e.target.value)} /></label>
+          <label className="contact-form-message"><span>Your question</span><textarea name="message" rows={5} required placeholder="Ask about a product, gift card, store hours or anything else..." value={message} onChange={e => setMessage(e.target.value)} /></label>
+          <div className="contact-form-actions">
+            <Button type="submit" variant="shop"><MessageCircle /> Send on WhatsApp</Button>
+            <Button type="button" variant="outline" onClick={sendEmail}>Send by Email <ArrowUpRight /></Button>
+          </div>
+          <p className="gift-note">WhatsApp opens with your message ready for {facts.phone}. Email opens your mail app to {business.email}.</p>
+        </form>
+      </div>
+      <div className="mt-8 border-t border-border pt-6">
+        <h3 className="mb-2 text-lg font-bold">Customer Reviews</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} customers.</p>
+        <Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Read Reviews on Google Maps <ArrowUpRight /></a></Button>
+      </div>
+    </>}
+  </section>;
+}
 function Footer({ groups, facts, directions, ask }: { groups: CatalogGroup[]; facts: StoreFacts; directions: string; ask: (text: string) => string }) { return <footer className="footer"><div className="store-container footer-grid"><div><Brand /><p className="mt-5 max-w-xs">Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><a href={directions} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1">Find our store <ArrowUpRight size={12} /></a></div><div><h3>Shop GAME PLAY</h3>{groups.map(group => <Link className="block" key={group.name} to="/shop" search={shopSearch(group.name)}>{group.name}</Link>)}</div><div><h3>Explore</h3><Link className="block" to="/">Home</Link><Link className="block" to="/shop" search={shopSearch()}>Products</Link><Link className="block" to="/categories">Categories</Link><Link className="block" to="/shop" search={shopSearch('All', '', '', true)}>Special Offers</Link><Link className="block" to="/about">About Us</Link><Link className="block" to="/contact">Contact Us</Link><a className="block" href={directions} target="_blank" rel="noreferrer">Customer Reviews</a></div><div><h3>Get in Touch</h3><p>{facts.address}</p><a className="mt-3 block" href={phoneLink(facts.phone)}>{facts.phone}</a><p>Closes at {facts.closingTime}</p><a className="mt-3 flex items-center gap-2" href={ask('Hi GAME PLAY!')} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a></div></div><div className="footer-bottom"><div className="store-container flex flex-wrap justify-between gap-3"><span>© {new Date().getFullYear()} GAME PLAY. All rights reserved.</span><span>Made for the love of gaming.</span></div></div></footer>; }

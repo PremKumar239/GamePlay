@@ -85,7 +85,7 @@ function Showcase({ title, filters, products, viewAll = false }: { title: string
         )}
         <div className="showcase-actions">
           <button type="button" className="showcase-arrow" aria-label={`Previous ${title} product`} disabled={count < 2} onClick={() => step(-1)}><ChevronLeft size={18} /></button>
-          {current ? <Button asChild variant="shop"><Link to="/shop" search={shopSearch(filter.group, filter.sub, current.name)}>Shop now</Link></Button> : <Button variant="shop" disabled>Shop now</Button>}
+          {current ? <Button asChild variant="shop"><Link to="/product/$productId" params={{ productId: String(current.id) }}>Shop now</Link></Button> : <Button variant="shop" disabled>Shop now</Button>}
           <button type="button" className="showcase-arrow" aria-label={`Next ${title} product`} disabled={count < 2} onClick={() => step(1)}><ChevronRight size={18} /></button>
         </div>
         {viewAll && <Link className="showcase-view" to="/shop" search={shopSearch(filter.group, filter.sub)}>View all</Link>}

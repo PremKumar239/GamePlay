@@ -81,6 +81,7 @@ export const categories = [
   { name: 'Mice', label: 'Precision meets speed', image: mouseImage },
 ];
 export const money = (value: number) => `Rs. ${value.toLocaleString('en-PK')}`;
+export const getProduct = (id: number, source: Product[] = products) => source.find(product => product.id === id) ?? null;
 type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; image_url?: string | null; price: number; old_price: number | null; badge: string | null; description?: string | null; stock?: number | null };
 export async function loadProductsFromDatabase(): Promise<Product[] | null> {
   const db = supabase;

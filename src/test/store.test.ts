@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { business, catalog, filterProducts, cartTotal, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
+import { business, catalog, filterProducts, cartTotal, getProduct, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
 describe('Supplied store details', () => {
   it('preserves the supplied rating', () => expect(business.rating).toBe(4.8));
   it('preserves the supplied review count', () => expect(business.reviews).toBe(76));
@@ -19,6 +19,7 @@ describe('Shopping interactions', () => {
   it('leaves an empty category empty', () => expect(filterProducts('Laptop', '', false, 'Mac')).toEqual([]));
   it('lists Vivo and OPPO under Mobiles', () => expect(catalog.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']));
   it('lists the gift card brands', () => expect(catalog.find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox']));
+  it('finds a product by id', () => expect(getProduct(2)?.name).toBe('DualSense Wireless Controller — White'));
   it('drops gift card brands outside the store list', () => expect(mergeCatalog([{ name: 'Gift Cards', label: 'Extra brands', subcategories: ['Steam', 'Google Play', 'Razer Gold'] }]).find(group => group.name === 'Gift Cards')?.subcategories).toEqual(['Steam', 'Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'iTunes', 'Roblox']));
   it('keeps local subcategories when the database catalog is older', () => {
     const merged = mergeCatalog([{ name: 'Mobiles', label: 'Phones', subcategories: ['Apple'] }, { name: 'Cameras', label: 'Photo', subcategories: ['Lenses'] }]);

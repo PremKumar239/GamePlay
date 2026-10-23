@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Folders, LayoutDashboard, LineChart, LogOut, Menu, MessageSquareText, Package, Settings, ShoppingBag, Warehouse, X } from 'lucide-react';
+import { Folders, LayoutDashboard, LineChart, LogOut, Menu, MessageSquareText, Package, Percent, Settings, ShoppingBag, Warehouse, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -10,6 +10,7 @@ const links = [
   { to: '/admin/orders', label: 'Orders', icon: ShoppingBag, exact: false },
   { to: '/admin/messages', label: 'Messages', icon: MessageSquareText, exact: false },
   { to: '/admin/sales', label: 'Sales', icon: LineChart, exact: false },
+  { to: '/admin/tax', label: 'Tax', icon: Percent, exact: false },
   { to: '/admin/inventory', label: 'Inventory', icon: Warehouse, exact: false },
   { to: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
 ] as const;

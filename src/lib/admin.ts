@@ -232,6 +232,102 @@ export async function saveSettings(input: Omit<StoreSettings, 'id'>) {
   fail(result.error);
 }
 
+export type TaxSettings = {
+  id: number;
+  card_tax_percent: number;
+  cod_tax_percent: number;
+};
+
+export type TaxPaymentKind = 'card' | 'cod' | 'other';
+
+export const taxPaymentMethods = ['card', 'cod'] as const;
+export type TaxPaymentMethod = (typeof taxPaymentMethods)[number];
+
+export async function fetchTaxSettings() {
+  const result = await db().from('tax_settings').select('id,card_tax_percent,cod_tax_percent').eq('id', 1).maybeSingle();
+  fail(result.error);
+  if (result.data) {
+    return {
+      id: result.data.id as number,
+      card_tax_percent: Number(result.data.card_tax_percent),
+      cod_tax_percent: Number(result.data.cod_tax_percent),
+    } satisfies TaxSettings;
+  }
+  const created = await db().from('tax_settings').insert({ id: 1, card_tax_percent: 0, cod_tax_percent: 0 }).select('id,card_tax_percent,cod_tax_percent').single();
+  fail(created.error);
+  return {
+    id: created.data.id as number,
+    card_tax_percent: Number(created.data.card_tax_percent),
+    cod_tax_percent: Number(created.data.cod_tax_percent),
+  } satisfies TaxSettings;
+}
+
+export async function saveTaxSettings(input: Pick<TaxSettings, 'card_tax_percent' | 'cod_tax_percent'>) {
+  const result = await db().from('tax_settings').upsert({
+    id: 1,
+    card_tax_percent: input.card_tax_percent,
+    cod_tax_percent: input.cod_tax_percent,
+  });
+  fail(result.error);
+}
+
+export async function updateOrderPaymentMethod(id: number, paymentMethod: TaxPaymentMethod) {
+  const result = await db().from('orders').update({ payment_method: paymentMethod }).eq('id', id);
+  fail(result.error);
+}
+
+/** Admin Tax section only — maps stored payment_method to card / COD rates. WhatsApp enquiries count as COD. */
+export function taxPaymentKind(method: string): TaxPaymentKind {
+  const value = method.trim().toLowerCase();
+  if (value === 'card' || value === 'card payment' || value === 'card_payment') return 'card';
+  if (
+    value === 'cod'
+    || value === 'cash'
+    || value === 'cash on delivery'
+    || value === 'cash_on_delivery'
+    || value === 'whatsapp'
+  ) return 'cod';
+  return 'other';
+}
+
+export function taxPercentFor(kind: TaxPaymentKind, settings: Pick<TaxSettings, 'card_tax_percent' | 'cod_tax_percent'>) {
+  if (kind === 'card') return settings.card_tax_percent;
+  if (kind === 'cod') return settings.cod_tax_percent;
+  return 0;
+}
+
+export function taxAmountFor(orderTotal: number, percent: number) {
+  return Math.round((orderTotal * percent) / 100);
+}
+
+export function taxSummary(orders: AdminOrder[], settings: Pick<TaxSettings, 'card_tax_percent' | 'cod_tax_percent'>) {
+  const rows = orders
+    .filter(order => order.status !== 'cancelled')
+    .map(order => {
+      const kind = taxPaymentKind(order.payment_method);
+      const percent = taxPercentFor(kind, settings);
+      const tax = taxAmountFor(order.total, percent);
+      return {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        paymentMethod: order.payment_method,
+        kind,
+        orderAmount: order.total,
+        taxPercent: percent,
+        taxAmount: tax,
+        createdAt: order.created_at,
+      };
+    });
+  const cardTax = rows.filter(row => row.kind === 'card').reduce((sum, row) => sum + row.taxAmount, 0);
+  const codTax = rows.filter(row => row.kind === 'cod').reduce((sum, row) => sum + row.taxAmount, 0);
+  return {
+    rows,
+    cardTax,
+    codTax,
+    totalTax: cardTax + codTax,
+  };
+}
+
 export function isPaidSale(order: AdminOrder) {
   return order.payment_status === 'paid' && order.status !== 'cancelled';
 }

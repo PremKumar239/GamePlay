@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { salesSummary, type AdminOrder, type AdminProduct } from '@/lib/admin';
+import { salesSummary, taxSummary, type AdminOrder, type AdminProduct } from '@/lib/admin';
 
 const pad: AdminProduct = {
   id: 1, name: 'Pad', category: 'Controllers', group_name: 'PlayStation', subcategory: 'Controllers',
@@ -35,5 +35,22 @@ describe('admin sales', () => {
     expect(summary.pending).toBe(1);
     expect(summary.lowStock.map(product => product.name)).toEqual(['Pad']);
     expect(summary.bestsellers[0]?.quantity).toBe(2);
+  });
+});
+
+describe('admin tax', () => {
+  it('applies card and COD percentages without changing order totals', () => {
+    const summary = taxSummary([
+      order({ id: 1, status: 'confirmed', payment_status: 'paid', payment_method: 'card', total: 10000 }),
+      order({ id: 2, status: 'pending', payment_status: 'unpaid', payment_method: 'whatsapp', total: 5000 }),
+      order({ id: 3, status: 'cancelled', payment_status: 'paid', payment_method: 'cod', total: 8000 }),
+    ], { card_tax_percent: 5, cod_tax_percent: 2 });
+
+    expect(summary.rows).toHaveLength(2);
+    expect(summary.rows[0]?.taxAmount).toBe(500);
+    expect(summary.rows[1]?.taxAmount).toBe(100);
+    expect(summary.cardTax).toBe(500);
+    expect(summary.codTax).toBe(100);
+    expect(summary.totalTax).toBe(600);
   });
 });

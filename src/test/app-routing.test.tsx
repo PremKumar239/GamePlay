@@ -19,5 +19,6 @@ describe("App routing", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     expect(router.matchRoutes("/admin").at(-1)?.routeId).not.toBe(rootRouteId);
     expect(router.matchRoutes("/admin/orders").some(match => match.routeId === "/admin/orders")).toBe(true);
+    expect(router.matchRoutes("/admin/tax").some(match => match.routeId === "/admin/tax")).toBe(true);
   });
 });

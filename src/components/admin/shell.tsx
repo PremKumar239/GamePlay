@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Folders, LayoutDashboard, LineChart, LogOut, Menu, MessageSquareText, Package, Percent, Settings, ShoppingBag, Warehouse, X } from 'lucide-react';
+import { ArrowLeft, Folders, LayoutDashboard, LineChart, LogOut, Menu, MessageSquareText, Package, Percent, Settings, ShoppingBag, Warehouse, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -31,10 +31,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
       return;
     }
     let active = true;
+    let acceptSession = false;
     const client = supabase;
-    async function check() {
+
+    async function applySession() {
       const { data: { session } } = await client.auth.getSession();
-      if (!active) return;
+      if (!active || !acceptSession) return;
       if (!session) {
         setGate('login');
         setAccount('');
@@ -55,8 +57,18 @@ export function AdminShell({ children }: { children: ReactNode }) {
       setAccount(profile.email || session.user.email || '');
       setGate('ready');
     }
-    check();
-    const { data: subscription } = client.auth.onAuthStateChange(() => { void check(); });
+
+    async function boot() {
+      // Always clear any saved session so opening /admin asks for email and password.
+      await client.auth.signOut();
+      if (!active) return;
+      acceptSession = true;
+      setGate('login');
+      setAccount('');
+    }
+
+    void boot();
+    const { data: subscription } = client.auth.onAuthStateChange(() => { void applySession(); });
     return () => {
       active = false;
       subscription.subscription.unsubscribe();
@@ -92,6 +104,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           <h1>This account is not an admin</h1>
           <p>{account || 'This user'} can sign in, but only a profile with the admin role can open the panel. Promote the user from the Supabase SQL editor, then sign in again.</p>
           <button type="button" className="admin-button" onClick={signOut}>Sign out</button>
+          <Link className="admin-side-link" to="/"><ArrowLeft size={15} /> Back to website</Link>
         </div>
       </section>
     );
@@ -118,6 +131,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </nav>
         <div className="admin-side-foot">
           <span>{account}</span>
+          <Link className="admin-side-link" to="/" onClick={() => setNavOpen(false)}><ArrowLeft size={15} /> Back to website</Link>
           <button type="button" onClick={signOut}><LogOut size={15} /> Log out</button>
         </div>
       </aside>
@@ -152,11 +166,12 @@ function Login({ notice, onError }: { notice: string; onError: (value: string) =
       <form className="admin-card" onSubmit={submit}>
         <p className="admin-kicker">GAME PLAY</p>
         <h1>Admin sign in</h1>
-        <p>Use the admin account created in Supabase. Shop visitors cannot open this panel.</p>
+        <p>Enter your email and password each time you open the admin panel.</p>
         <label>Email<input type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} required /></label>
         <label>Password<input type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} required /></label>
         {notice && <p className="admin-notice is-error">{notice}</p>}
         <button className="admin-button" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
+        <Link className="admin-side-link" to="/"><ArrowLeft size={15} /> Back to website</Link>
       </form>
     </section>
   );

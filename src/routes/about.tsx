@@ -4,9 +4,9 @@ import { Storefront } from '@/components/storefront';
 export const Route = createFileRoute('/about')({
   head: () => ({ meta: [
     { title: 'About GAME PLAY | Bahria Town Lahore' },
-    { name: 'description', content: 'GAME PLAY is a gaming store in Bahria Town, Lahore. Rated 4.8/5 by 76 customers. Consoles, games and accessories.' },
+    { name: 'description', content: 'About GAME PLAY in Bahria Town, Lahore — consoles, games, accessories, gift cards, plus refund and exchange for store and online purchases.' },
     { property: 'og:title', content: 'About GAME PLAY' },
-    { property: 'og:description', content: 'Your destination for consoles, games and gaming essentials in Bahria Town, Lahore.' },
+    { property: 'og:description', content: 'Gaming store in Bahria Town, Lahore. Service-first shopping with refund and exchange for in-store and online orders.' },
     { property: 'og:type', content: 'website' },
     { name: 'twitter:card', content: 'summary_large_image' },
   ] }),

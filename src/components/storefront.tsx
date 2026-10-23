@@ -91,7 +91,54 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
 function SectionHeading({title,link,to}:{title:string;link?:string;to?:'/'|'/categories'|'/about'|'/contact'}) { return <div className="section-heading"><h2>{title}</h2>{link && (to ? <Link className="section-link" to={to}>{link} <ArrowRight size={14} /></Link> : <Link className="section-link" to="/shop" search={shopSearch()}>{link} <ArrowRight size={14} /></Link>)}</div>; }
 function Breadcrumb({category,subcategory}:{category:string;subcategory:string}) { return <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span>{category === 'All' ? <span>Products</span> : <Link to="/shop" search={shopSearch()}>Products</Link>}{category !== 'All' && <><span aria-hidden="true">/</span><Link to="/categories">Categories</Link><span aria-hidden="true">/</span>{subcategory ? <Link to="/shop" search={shopSearch(category)}>{category}</Link> : <span>{category}</span>}</>}{subcategory && <><span aria-hidden="true">/</span><span>{subcategory}</span></>}</nav>; }
 function CategoryDirectory({ groups }: { groups: CatalogGroup[] }) { return <section className="section store-container"><nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>Categories</span></nav><SectionHeading title="Categories" /><div className="catalog-board">{groups.map(group => <article className="catalog-card" key={group.name}>{group.image ? <img src={group.image} alt="" width={180} height={120} /> : <span className="catalog-mark">{group.name.slice(0, 2)}</span>}<div><h3>{group.name}</h3><p>{group.label}</p><Link className="catalog-view" to="/shop" search={shopSearch(group.name)}>View {group.name} products</Link>{group.subcategories.length > 0 && <div className="sub-list">{group.subcategories.map(sub => <Link key={sub} to="/shop" search={shopSearch(group.name, sub)}>{sub}</Link>)}</div>}</div></article>)}</div></section>; }
-function AboutSection({ facts }: { facts: StoreFacts }) { return <section className="section store-container"><nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>About Us</span></nav><SectionHeading title="About Us" /><div className="about-copy"><p>Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><p>{facts.name} is at {facts.address}. The store is rated {business.rating}/5 from {business.reviews} customer reviews and closes at {facts.closingTime}.</p><p>Call {facts.phone} to confirm today's hours, stock and prices. Orders on this site are WhatsApp enquiries.</p><Button asChild variant="dark"><Link to="/contact">Contact Us <ArrowRight /></Link></Button></div></section>; }
+function AboutSection({ facts }: { facts: StoreFacts }) {
+  return <section className="section store-container about-page">
+    <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>About Us</span></nav>
+    <SectionHeading title="About Us" />
+    <div className="about-copy">
+      <article className="about-block">
+        <h3>Get to Know Us</h3>
+        <p>{facts.name} has been serving gamers in Lahore with consoles, games, accessories and gift cards. With our Bahria Town store and this online catalogue, our mission is to earn your trust through clear prices, honest advice and friendly support — before, during and after every purchase.</p>
+        <p>Competitive pricing matters, but great service matters more. We keep a knowledgeable team ready to help you choose the right setup, confirm stock and make sure you leave happy — whether you shop in person or enquire online.</p>
+      </article>
+      <article className="about-block">
+        <h3>What We Do</h3>
+        <p>Our approach is simple: make gaming easy to shop. Find what you need, ask about availability, and get top-tier service from real people who play. We continually improve how we help customers across Pakistan — from PlayStation and Xbox gear to Nintendo, mobiles, laptops and digital gift cards — at fair, sample prices you confirm with the store.</p>
+        <p>Visit us at {facts.address}. Rated {business.rating}/5 from {business.reviews} reviews. Store hours close at {facts.closingTime} — call {facts.phone} to confirm today’s opening times.</p>
+      </article>
+      <article className="about-block">
+        <h3>Principles Over Profits</h3>
+        <p>We build long-term relationships with players, not one-off sales. That means recommending what actually fits your budget and games — even when a cheaper or different option is the better call. You come first in every recommendation, WhatsApp reply and in-store conversation.</p>
+      </article>
+      <article className="about-block">
+        <h3>What Can We Do For You?</h3>
+        <ul className="about-list">
+          <li><strong>Customer support.</strong> Ask about stock, editions, gift cards or setup help anytime — by call, WhatsApp or in store. We’re here before, during and after your purchase.</li>
+          <li><strong>Fair value.</strong> Sample catalogue prices online; the store confirms the final price so you always know what you’re paying.</li>
+          <li><strong>Personal help.</strong> No bots for the important stuff. Our team helps you compare consoles, controllers, games and accessories so you can buy with confidence.</li>
+        </ul>
+      </article>
+      <article className="about-block" id="refund-exchange">
+        <h3>Refund &amp; Exchange Policy</h3>
+        <p>GAME PLAY accepts refunds and exchanges for eligible purchases made at our physical store in Bahria Town or through online / WhatsApp enquiries completed with the store. Policy highlights:</p>
+        <ul className="about-list">
+          <li><strong>Store &amp; online.</strong> The same refund and exchange options apply whether you buy in person or complete an order after an online enquiry.</li>
+          <li><strong>Contact us first.</strong> Call {facts.phone} or message us on WhatsApp to start a refund or exchange. Bring your receipt, invoice or order details.</li>
+          <li><strong>Unused &amp; original condition.</strong> Products should be unused, complete with original packaging, accessories, seals and tags where applicable.</li>
+          <li><strong>Time window.</strong> Request a refund or exchange within a reasonable period after purchase (confirm the exact window with the store when you buy).</li>
+          <li><strong>Digital gift cards.</strong> Once a digital code or gift card has been revealed, delivered or activated, it generally cannot be refunded or exchanged.</li>
+          <li><strong>Faulty items.</strong> Defective products may be exchanged or refunded after the store checks the item. Manufacturer warranty terms may also apply.</li>
+          <li><strong>Final say.</strong> Eligibility is confirmed by GAME PLAY staff. Some clearance, opened software or special-order items may be non-returnable — ask before you pay.</li>
+        </ul>
+      </article>
+      <p className="gift-note">Orders on this website are WhatsApp enquiries. Stock, prices and refund or exchange terms are confirmed by the store before you pay.</p>
+      <div className="about-actions">
+        <Button asChild variant="dark"><Link to="/contact">Contact Us <ArrowRight /></Link></Button>
+        <Button asChild variant="outline"><a href={phoneLink(facts.phone)}>Call {facts.phone}</a></Button>
+      </div>
+    </div>
+  </section>;
+}
 const giftBannerSlides = [
   { image: giftBannerXbox, alt: 'Xbox gift cards', category: 'Gift Cards', sub: 'Xbox', width: 1024, height: 254 },
   { image: giftBannerApple, alt: 'Apple gift cards', category: 'Gift Cards', sub: 'Apple', width: 1024, height: 256 },

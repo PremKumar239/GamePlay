@@ -12,6 +12,12 @@ import nintendoCard from '@/assets/gift-card-nintendo.jpg';
 import steamCard from '@/assets/gift-card-steam.jpg';
 import itunesCard from '@/assets/gift-card-itunes.jpg';
 import robloxCard from '@/assets/gift-card-roblox.jpg';
+import playstationCategory from '@/assets/category-playstation.png';
+import xboxCategory from '@/assets/category-xbox.png';
+import metaCategory from '@/assets/category-meta.png';
+import mobilesCategory from '@/assets/category-mobiles.png';
+import laptopCategory from '@/assets/category-laptop.png';
+import giftCardsCategory from '@/assets/category-gift-cards.jpg';
 import { supabase } from '@/lib/supabase';
 
 const productImages: Record<string, string> = {
@@ -51,13 +57,13 @@ export const products: Product[] = [
 ];
 export type CatalogGroup = { name: string; label: string; image?: string; subcategories: string[] };
 export const catalog: CatalogGroup[] = [
-  { name: 'PlayStation', label: 'Games, controllers, consoles and accessories', image: consoleImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
-  { name: 'Xbox', label: 'Controllers, consoles and accessories', image: xboxCard, subcategories: ['Controllers', 'Consoles', 'Accessories'] },
-  { name: 'Meta', label: 'Consoles and accessories', subcategories: ['Consoles', 'Accessories'] },
+  { name: 'PlayStation', label: 'Games, controllers, consoles and accessories', image: playstationCategory, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
+  { name: 'Xbox', label: 'Controllers, consoles and accessories', image: xboxCategory, subcategories: ['Controllers', 'Consoles', 'Accessories'] },
+  { name: 'Meta', label: 'Consoles and accessories', image: metaCategory, subcategories: ['Consoles', 'Accessories'] },
   { name: 'Nintendo', label: 'Games, controllers, consoles and accessories', image: handheldImage, subcategories: ['Games', 'Controllers', 'Consoles', 'Accessories'] },
-  { name: 'Mobiles', label: 'Apple, Samsung, Mi, Vivo, OPPO and accessories', subcategories: ['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories'] },
-  { name: 'Laptop', label: 'Mac computers', subcategories: ['Mac'] },
-  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: playstationCard, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
+  { name: 'Mobiles', label: 'Apple, Samsung, Mi, Vivo, OPPO and accessories', image: mobilesCategory, subcategories: ['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories'] },
+  { name: 'Laptop', label: 'Mac computers', image: laptopCategory, subcategories: ['Mac'] },
+  { name: 'Gift Cards', label: 'Apple, PlayStation, Xbox, Nintendo eShop, Steam, iTunes and Roblox', image: giftCardsCategory, subcategories: ['Apple', 'PlayStation', 'Xbox', 'Nintendo eShop', 'Steam', 'iTunes', 'Roblox'] },
 ];
 export type GiftBrand = { name: string; tone: string; image: string };
 export const giftBrands: GiftBrand[] = [

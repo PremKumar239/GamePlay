@@ -27,4 +27,11 @@ describe('Shopping interactions', () => {
     expect(merged.find(group => group.name === 'Mobiles')?.subcategories).toEqual(['Apple', 'Samsung', 'Mi', 'Vivo', 'OPPO', 'Accessories']);
     expect(merged.some(group => group.name === 'Cameras')).toBe(true);
   });
+  it('keeps Nintendo image unchanged while other shop categories have photos', () => {
+    const nintendo = catalog.find(group => group.name === 'Nintendo');
+    expect(nintendo?.image).toBe(catalog.find(group => group.name === 'Nintendo')?.image);
+    expect(['PlayStation', 'Xbox', 'Meta', 'Mobiles', 'Laptop', 'Gift Cards'].every(name => Boolean(catalog.find(group => group.name === name)?.image))).toBe(true);
+    const merged = mergeCatalog([{ name: 'Nintendo', label: 'Games', subcategories: ['Games'] }]);
+    expect(merged.find(group => group.name === 'Nintendo')?.image).toBe(nintendo?.image);
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filterReviews, googlePlace, googleReviews, recommendPercent, relativeReviewDate } from '@/lib/reviews';
+import { filterReviews, googlePlace, googleReviews, mapGooglePlaceDetails, recommendPercent, relativeReviewDate } from '@/lib/reviews';
 
 describe('GAME PLAY Bahria reviews', () => {
   it('keeps the Google listing score from GAME PLAY Bahria', () => {
@@ -21,5 +21,18 @@ describe('GAME PLAY Bahria reviews', () => {
   it('formats review dates relative to today', () => {
     expect(relativeReviewDate('2026-11-15', new Date('2026-11-15T18:00:00'))).toBe('Today');
     expect(relativeReviewDate('2026-10-16', new Date('2026-11-15T12:00:00'))).toBe('1 month ago');
+  });
+
+  it('keeps previous reviews when Google sends a new one', () => {
+    const mapped = mapGooglePlaceDetails({
+      name: 'GAME PLAY BAHRIA',
+      rating: 4.8,
+      user_ratings_total: 107,
+      reviews: [{ author_name: 'Ali', rating: 5, text: 'Bought a controller today. Excellent service.', time: 1763251200 }],
+    }, googleReviews);
+    expect(mapped.live).toBe(true);
+    expect(mapped.count).toBe(107);
+    expect(mapped.reviews.some(review => review.body.includes('controller today'))).toBe(true);
+    expect(mapped.reviews.some(review => /Switch Lite/i.test(review.body))).toBe(true);
   });
 });

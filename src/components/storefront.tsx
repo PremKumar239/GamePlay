@@ -15,7 +15,7 @@ import giftBannerDepot from '@/assets/gift-banner-depot.jpg';
 import giftBannerSteam from '@/assets/gift-banner-steam.jpg';
 import { HomeShowcases } from '@/components/product-showcase';
 import { ReviewsPanel, ReviewsTab } from '@/components/reviews-panel';
-import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeContactMessage, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
+import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadReviews, loadStoreFacts, mergeCatalog, placeContactMessage, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
 export function Brand() { return <Link to="/" className="brand" aria-label="GAME PLAY home"><img src="/favicon.png" alt="" width={52} height={52} /><span className="brand-lockup"><span className="brand-name">GAME PLAY</span><span className="brand-tag">Gaming store</span></span></Link>; }
@@ -29,6 +29,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
   const [listed, setListed] = useState(products);
   const [groups, setGroups] = useState(catalog);
   const [facts, setFacts] = useState<StoreFacts>(defaultFacts);
+  const [reviewStats, setReviewStats] = useState({ rating: business.rating, count: business.reviews });
   const {cart, setCart, favorites, setFavorites, wishOnly, setWishOnly} = useShopping();
   const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
@@ -44,6 +45,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
     loadProductsFromDatabase().then(rows => { if (!cancel && rows) setListed(rows); });
     loadCatalogFromDatabase().then(rows => { if (!cancel) setGroups(mergeCatalog(rows)); });
     loadStoreFacts().then(rows => { if (!cancel && rows) setFacts(rows); });
+    loadReviews().then(rows => { if (!cancel) setReviewStats({ rating: rows.rating, count: rows.count }); });
     return () => { cancel = true; };
   }, []);
   useEffect(() => {
@@ -80,9 +82,9 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
       {page === 'shop' && category === 'Gift Cards' && <GiftCards subcategory={subcategory} ask={askStore} flush />}{(page === 'home' || page === 'shop') && <section id="products" className="section store-container scroll-reveal">{page === 'shop' && <Breadcrumb category={category} subcategory={subcategory} />}<div className="section-heading"><h2>{wishOnly ? 'Your Wishlist' : page === 'shop' ? deals ? 'Special Offers' : category === 'All' ? 'Products' : subcategory ? `${category} ${subcategory}` : category : 'Featured Products'}</h2><div className="catalog-tools"><Button variant={category === 'All' && !subcategory ? 'dark' : 'ghost'} size="sm" onClick={() => { if (page === 'shop') { navigate({ to: '/shop', search: shopSearch('All', '', query, deals) }); return; } setCategory('All'); setSubcategory(''); }}>All Products</Button>{groups.map(group => <Button key={group.name} variant={category === group.name ? 'dark' : 'ghost'} size="sm" onClick={() => { if (page === 'shop' || group.name === 'Gift Cards') { navigate({ to: '/shop', search: shopSearch(group.name, '', query, deals) }); return; } setCategory(group.name); setSubcategory(''); }}>{group.name}</Button>)}</div></div>{activeGroup && activeGroup.subcategories.length > 0 && <div className="catalog-tools sub-tools">{activeGroup.subcategories.map(sub => <Button key={sub} variant={subcategory === sub ? 'dark' : 'ghost'} size="sm" onClick={() => { const next = subcategory === sub ? '' : sub; if (page === 'shop') { navigate({ to: '/shop', search: shopSearch(category, next, query, deals) }); return; } setSubcategory(next); }}>{sub}</Button>)}</div>}{page === 'shop' && <div className="mb-5 flex items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{visible.length} products</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={deals} onChange={e => navigate({ to: '/shop', search: shopSearch(category, subcategory, query, e.target.checked) })} /> Special offers only</label></div>}{wishOnly && <Button size="sm" variant="outline" className="mb-4" onClick={() => setWishOnly(false)}>Show all products <X /></Button>}{visible.length ? <div className="product-grid">{visible.map(p => <ProductCard key={p.id} product={p} saved={favorites.includes(p.id)} onFavorite={() => toggleFavorite(p.id)} onAdd={() => add(p.id)} />)}</div> : category === 'Gift Cards' ? <GiftSkus brand={subcategory} ask={askStore} /> : <div className="py-16 text-center text-muted-foreground"><Search className="mx-auto mb-4" /><h3 className="font-bold">No products in {subcategory ? `${category} ${subcategory}` : category === 'All' ? 'this view' : category} yet</h3><p className="mx-auto mt-2 max-w-md text-xs">Ask the store what is available, or browse the rest of the catalog.</p><Button variant="link" onClick={() => { setWishOnly(false); if (page === 'shop') { navigate({ to: '/shop', search: shopSearch() }); return; } setQuery(''); setCategory('All'); setSubcategory(''); setDeals(false); }}>Browse all products</Button></div>}<p className="mt-5 text-[10px] text-muted-foreground">Sample catalog & indicative prices. Contact the store to confirm current stock, specifications and pricing.</p>{page === 'home' && <div className="mt-6 text-center"><Button variant="outline" asChild><Link to="/shop" search={shopSearch()}>View All Products <ArrowRight /></Link></Button></div>}</section>}
       {page === 'product' && <ProductDetail product={detail} saved={detail ? favorites.includes(detail.id) : false} onFavorite={() => detail && toggleFavorite(detail.id)} onAdd={() => detail && add(detail.id)} ask={askStore} />}
       {page === 'categories' && <CategoryDirectory groups={groups} />}
-      {page === 'about' && <AboutSection facts={facts} />}
+      {page === 'about' && <AboutSection facts={facts} reviewStats={reviewStats} />}
       {page === 'home' && <div className="store-container"><div className="brand-band"><span>PlayStation.</span><span className="italic">XBOX</span><span>NINTENDO</span><span className="font-sans text-xl">logitech G</span><span>HYPERX</span><span>RAZER</span></div></div>}
-      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} />
+      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} reviewStats={reviewStats} />
     </main>
     <Footer groups={groups} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} />
     {!reviewsOpen && <ReviewsTab onOpen={() => setReviewsOpen(true)} />}
@@ -95,7 +97,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
 function SectionHeading({title,link,to}:{title:string;link?:string;to?:'/'|'/categories'|'/about'|'/contact'}) { return <div className="section-heading"><h2>{title}</h2>{link && (to ? <Link className="section-link" to={to}>{link} <ArrowRight size={14} /></Link> : <Link className="section-link" to="/shop" search={shopSearch()}>{link} <ArrowRight size={14} /></Link>)}</div>; }
 function Breadcrumb({category,subcategory}:{category:string;subcategory:string}) { return <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span>{category === 'All' ? <span>Products</span> : <Link to="/shop" search={shopSearch()}>Products</Link>}{category !== 'All' && <><span aria-hidden="true">/</span><Link to="/categories">Categories</Link><span aria-hidden="true">/</span>{subcategory ? <Link to="/shop" search={shopSearch(category)}>{category}</Link> : <span>{category}</span>}</>}{subcategory && <><span aria-hidden="true">/</span><span>{subcategory}</span></>}</nav>; }
 function CategoryDirectory({ groups }: { groups: CatalogGroup[] }) { return <section className="section store-container"><nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>Categories</span></nav><SectionHeading title="Categories" /><div className="catalog-board">{groups.map(group => <article className="catalog-card" key={group.name}>{group.image ? <img src={group.image} alt="" width={180} height={120} /> : <span className="catalog-mark">{group.name.slice(0, 2)}</span>}<div><h3>{group.name}</h3><p>{group.label}</p><Link className="catalog-view" to="/shop" search={shopSearch(group.name)}>View {group.name} products</Link>{group.subcategories.length > 0 && <div className="sub-list">{group.subcategories.map(sub => <Link key={sub} to="/shop" search={shopSearch(group.name, sub)}>{sub}</Link>)}</div>}</div></article>)}</div></section>; }
-function AboutSection({ facts }: { facts: StoreFacts }) {
+function AboutSection({ facts, reviewStats }: { facts: StoreFacts; reviewStats: { rating: number; count: number } }) {
   return <section className="section store-container about-page">
     <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>About Us</span></nav>
     <SectionHeading title="About Us" />
@@ -108,7 +110,7 @@ function AboutSection({ facts }: { facts: StoreFacts }) {
       <article className="about-block">
         <h3>What We Do</h3>
         <p>Our approach is simple: make gaming easy to shop. Find what you need, ask about availability, and get top-tier service from real people who play. We continually improve how we help customers across Pakistan — from PlayStation and Xbox gear to Nintendo, mobiles, laptops and digital gift cards — at fair, sample prices you confirm with the store.</p>
-        <p>Visit us at {facts.address}. Rated {business.rating}/5 from {business.reviews} reviews. Store hours close at {facts.closingTime} — call {facts.phone} to confirm today’s opening times.</p>
+        <p>Visit us at {facts.address}. Rated {reviewStats.rating}/5 from {reviewStats.count} reviews. Store hours close at {facts.closingTime} — call {facts.phone} to confirm today’s opening times.</p>
       </article>
       <article className="about-block">
         <h3>Principles Over Profits</h3>
@@ -223,7 +225,7 @@ function ProductDetail({ product, saved, onFavorite, onAdd, ask }: { product: Pr
     </div>
   </section>;
 }
-function ContactSection({ full, facts, directions, ask, onOpenReviews }: { full: boolean; facts: StoreFacts; directions: string; ask: (text: string) => string; onOpenReviews: () => void }) {
+function ContactSection({ full, facts, directions, ask, onOpenReviews, reviewStats }: { full: boolean; facts: StoreFacts; directions: string; ask: (text: string) => string; onOpenReviews: () => void; reviewStats: { rating: number; count: number } }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -284,8 +286,8 @@ function ContactSection({ full, facts, directions, ask, onOpenReviews }: { full:
         <h3 className="mt-3 text-2xl font-extrabold">Great games. Even better company.</h3>
         <div className="mt-5 flex items-center gap-3">
           <div className="flex gap-0.5 text-rating">{[1, 2, 3, 4, 5].map(s => <Star key={s} size={15} fill="currentColor" />)}</div>
-          <strong>{business.rating}/5</strong>
-          <button type="button" className="text-xs text-muted-foreground underline" onClick={onOpenReviews}>{business.reviews} customer reviews</button>
+          <strong>{reviewStats.rating}/5</strong>
+          <button type="button" className="text-xs text-muted-foreground underline" onClick={onOpenReviews}>{reviewStats.count} customer reviews</button>
         </div>
         <div className="contact-detail"><MapPin /><div><strong>Find us</strong><p>{facts.address}</p></div></div>
         <div className="contact-detail"><Phone /><div><strong>Let's talk gaming</strong><p><a href={phoneLink(facts.phone)}>{facts.phone}</a></p></div></div>
@@ -322,7 +324,7 @@ function ContactSection({ full, facts, directions, ask, onOpenReviews }: { full:
       </div>
       <div className="mt-8 border-t border-border pt-6">
         <h3 className="mb-2 text-lg font-bold">Customer Reviews</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} Google reviews for GAME PLAY Bahria.</p>
+        <p className="mb-4 text-sm text-muted-foreground">Rated {reviewStats.rating} out of 5 by {reviewStats.count} Google reviews for GAME PLAY Bahria.</p>
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant="shop" onClick={onOpenReviews}>Read reviews</Button>
           <Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Open Google Maps <ArrowUpRight /></a></Button>

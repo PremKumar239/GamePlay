@@ -3,6 +3,18 @@ export type StoreReview = {
   stars: number;
   postedAt: string;
   body: string;
+  author?: string;
+};
+
+export type ReviewsPayload = {
+  name: string;
+  rating: number;
+  count: number;
+  stars: Record<1 | 2 | 3 | 4 | 5, number> | null;
+  reviews: StoreReview[];
+  source: 'google' | 'fallback';
+  live: boolean;
+  fetchedAt: string;
 };
 
 export type ReviewSort = 'newest' | 'highest' | 'lowest';
@@ -66,7 +78,8 @@ export const googleReviews: StoreReview[] = [
   },
 ];
 
-export function recommendPercent(place = googlePlace) {
+export function recommendPercent(place: { count: number; rating?: number; stars: Record<1 | 2 | 3 | 4 | 5, number> | null } = googlePlace) {
+  if (!place.stars) return Math.round(((place.rating ?? googlePlace.rating) / 5) * 100);
   const positive = place.stars[5] + place.stars[4];
   return Math.round((positive / place.count) * 100);
 }
@@ -84,8 +97,66 @@ export function filterReviews(reviews: StoreReview[], query = '', sort: ReviewSo
   });
 }
 
+export function fallbackReviewsPayload(): ReviewsPayload {
+  return {
+    name: googlePlace.name,
+    rating: googlePlace.rating,
+    count: googlePlace.count,
+    stars: googlePlace.stars,
+    reviews: googleReviews,
+    source: 'fallback',
+    live: false,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
+export function reviewId(author: string, postedAt: string, body: string) {
+  return `${author}|${postedAt}|${body.slice(0, 48)}`.toLowerCase().replace(/\s+/g, ' ').slice(0, 180);
+}
+
+type GooglePlaceReview = {
+  author_name?: string;
+  rating?: number;
+  text?: string;
+  time?: number;
+  relative_time_description?: string;
+};
+
+export function mapGooglePlaceDetails(result: {
+  name?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  reviews?: GooglePlaceReview[];
+}, previous: StoreReview[] = []): ReviewsPayload {
+  const incoming = (result.reviews ?? []).map(review => {
+    const postedAt = review.time ? new Date(review.time * 1000).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
+    const author = String(review.author_name || 'Google reviewer').trim();
+    const body = String(review.text || '').trim();
+    return {
+      id: reviewId(author, postedAt, body),
+      author,
+      stars: Math.min(5, Math.max(1, Math.round(Number(review.rating) || 5))),
+      postedAt,
+      body,
+    } satisfies StoreReview;
+  }).filter(review => review.body);
+  const merged = new Map<string, StoreReview>();
+  for (const review of [...previous, ...incoming]) merged.set(review.id, review);
+  const reviews = [...merged.values()].sort((a, b) => b.postedAt.localeCompare(a.postedAt)).slice(0, 80);
+  return {
+    name: String(result.name || googlePlace.name),
+    rating: Number(result.rating) || googlePlace.rating,
+    count: Number(result.user_ratings_total) || googlePlace.count,
+    stars: null,
+    reviews,
+    source: 'google',
+    live: true,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 export function relativeReviewDate(postedAt: string, now = new Date()) {
-  const then = new Date(`${postedAt}T12:00:00`);
+  const then = postedAt.includes('T') ? new Date(postedAt) : new Date(`${postedAt}T12:00:00`);
   if (Number.isNaN(then.getTime())) return postedAt;
   const days = Math.max(0, Math.round((now.getTime() - then.getTime()) / 86_400_000));
   if (days < 1) return 'Today';

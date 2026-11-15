@@ -4,6 +4,7 @@ import { extname, join } from 'node:path';
 import bcrypt from 'bcryptjs';
 import { db, query } from '@/lib/db';
 import type { AdminCategory, AdminContactMessage, AdminOrder, AdminProduct, MessageStatus, OrderStatus, PaymentStatus, ProductInput, StoreSettings, TaxPaymentMethod, TaxSettings } from '@/lib/admin';
+import { getStoreReviews } from '@/lib/google-reviews';
 import type { CatalogGroup, StoreFacts } from '@/lib/store';
 
 const COOKIE = 'gp_admin';
@@ -118,6 +119,11 @@ export async function handleApi(request: Request) {
         subcategories: subs.rows.filter(sub => Number(sub.category_id) === Number(row.id)).map(sub => sub.name),
       }));
       return json({ catalog });
+    }
+
+    if (path === '/api/reviews' && method === 'GET') {
+      const force = url.searchParams.get('refresh') === '1';
+      return json(await getStoreReviews(force));
     }
 
     if (path === '/api/settings' && method === 'GET') {

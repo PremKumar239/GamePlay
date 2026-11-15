@@ -71,9 +71,13 @@ function classify(title, type, productCategory) {
     subcategory = 'Games';
     category = 'Games';
   }
-  if (/controller|racing wheel/.test(hay)) {
+  if (/controller/.test(hay) && !/racing wheel|handbrake|shifter|playseat|driving force|controller grip|silicone cover|silicone case/.test(hay)) {
     subcategory = 'Controllers';
     category = 'Controllers';
+  }
+  if (/racing wheel|handbrake|shifter|playseat|driving force racing/.test(hay)) {
+    subcategory = 'Accessories';
+    category = 'Accessories';
   }
   if (/gaming console|vr headset|console system/.test(hay) || /\b(ps5 slim|ps5 pro|playstation 5|playstation 4|nintendo switch|switch lite|quest)\b/.test(hay) && /console|edition|pro|slim|lite/.test(hay)) {
     if (/gaming console|vr headset/i.test(type) || /playstation 5|playstation 4|nintendo switch|switch lite|quest 3/i.test(title)) {

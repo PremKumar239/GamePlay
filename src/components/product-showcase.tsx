@@ -12,8 +12,14 @@ type ShowcaseFilter = {
 };
 
 const isGame = (product: Product) => product.subcategory === 'Games' || product.category === 'Games';
-const isController = (product: Product) => product.subcategory === 'Controllers' || product.category === 'Controllers';
+const isSimOrControllerAccessory = (name: string) => /racing wheel|handbrake|shifter|playseat|driving force|steering wheel|wheel stand|pedal|cockpit|silicone cover|silicone case|controller grip|charging dock|storage stand/i.test(name);
+export const isShowcaseController = (product: Product) => {
+  const name = product.name;
+  if (isSimOrControllerAccessory(name)) return false;
+  return /dualsense|dualshock|gamepad|joy-?con|fighting stick|fight stick|all-button controller|victrix|\bcontroller\b/i.test(name);
+};
 const isPs4 = (product: Product) => /ps4|playstation 4|dualshock/i.test(product.name);
+const isPs4Controller = (product: Product) => /dualshock|playstation 4|\bps4\b/i.test(product.name) && !/dualsense|playstation 5|\bps5\b/i.test(product.name);
 
 const gameFilters: ShowcaseFilter[] = [
   { label: 'PlayStation 5 Games', group: 'PlayStation', sub: 'Games', match: product => isGame(product) && product.group === 'PlayStation' && !isPs4(product) },
@@ -22,9 +28,9 @@ const gameFilters: ShowcaseFilter[] = [
 ];
 
 const controllerFilters: ShowcaseFilter[] = [
-  { label: 'PS5 Controllers', group: 'PlayStation', sub: 'Controllers', match: product => isController(product) && product.group === 'PlayStation' && !isPs4(product) },
-  { label: 'Xbox Controllers', group: 'Xbox', sub: 'Controllers', match: product => isController(product) && (product.group === 'Xbox' || /xbox/i.test(product.name)) },
-  { label: 'PS4 Controllers', group: 'PlayStation', sub: 'Controllers', match: product => isController(product) && isPs4(product) },
+  { label: 'PS5 Controllers', group: 'PlayStation', sub: 'Controllers', match: product => isShowcaseController(product) && product.group === 'PlayStation' && !isPs4Controller(product) },
+  { label: 'Xbox Controllers', group: 'Xbox', sub: 'Controllers', match: product => isShowcaseController(product) && (product.group === 'Xbox' || /xbox/i.test(product.name)) && !/playstation|dualsense|dualshock|\bps5\b|\bps4\b/i.test(product.name) },
+  { label: 'PS4 Controllers', group: 'PlayStation', sub: 'Controllers', match: product => isShowcaseController(product) && isPs4Controller(product) },
 ];
 
 export function HomeShowcases({ products }: { products: Product[] }) {

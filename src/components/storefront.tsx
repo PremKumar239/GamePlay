@@ -218,7 +218,7 @@ function CartPage({ listed, cart, setCart, total, ask }: {
                 </div>
               )}
               {error && <p className="cart-form-error">{error}</p>}
-              <Button variant="shop" className="w-full" type="submit" disabled={busy}>{busy ? 'Sending…' : 'Place enquiry on WhatsApp'} <ArrowUpRight /></Button>
+              <Button variant="shop" className="w-full" type="submit" disabled={busy}>{busy ? 'Placing order…' : 'Place order'}</Button>
             </form>
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">GAME PLAY confirms stock and the final amount before you pay. No payment is taken on this website.</p>
             <Button variant="outline" className="mt-4 w-full" asChild><Link to="/shop" search={shopSearch()}>Continue Shopping</Link></Button>

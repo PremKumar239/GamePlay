@@ -3,18 +3,7 @@ import { ArrowUpRight, Search, Star, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loadReviews } from '@/lib/store';
 import { fallbackReviewsPayload, filterReviews, recommendPercent, relativeReviewDate, type ReviewsPayload, type ReviewSort } from '@/lib/reviews';
-import consoleImage from '@/assets/product-0.jpg';
-import controllerImage from '@/assets/product-1.jpg';
-import headsetImage from '@/assets/product-2.jpg';
-import keyboardImage from '@/assets/product-3.jpg';
-import mouseImage from '@/assets/product-4.jpg';
-import handheldImage from '@/assets/product-5.jpg';
-import gameImage from '@/assets/games-banner.jpg';
-import playstationImage from '@/assets/category-playstation.png';
-import xboxImage from '@/assets/category-xbox.png';
-import metaImage from '@/assets/category-meta.png';
 
-const photos = [handheldImage, controllerImage, consoleImage, gameImage, headsetImage, keyboardImage, mouseImage, playstationImage, xboxImage, metaImage];
 const starLevels = [5, 4, 3, 2, 1] as const;
 
 function Stars({ value, size = 14 }: { value: number; size?: number }) {
@@ -78,9 +67,6 @@ export function ReviewsPanel({ open, onClose, mapsUrl }: { open: boolean; onClos
               ))}
             </ul>
           )}
-        </div>
-        <div className="reviews-photos">
-          {photos.map((src, index) => <img key={`${index}-${src}`} src={src} alt="" />)}
         </div>
         <div className="reviews-tools">
           <label className="reviews-search">

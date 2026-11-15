@@ -384,9 +384,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .reviews-bars li { display:grid; grid-template-columns:36px 1fr 28px; align-items:center; gap:8px; font-size:11px; font-weight:700; }
 .reviews-bar { display:block; height:8px; border-radius:99px; background:var(--muted); overflow:hidden; }
 .reviews-bar i { display:block; height:100%; background:var(--rating); }
-.reviews-photos { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:16px 0; }
-.reviews-photos img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; background:var(--muted); }
-.reviews-tools { display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; }
+.reviews-tools { display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center; margin-top:16px; }
 .reviews-search { display:flex; align-items:center; gap:8px; min-height:38px; padding:0 10px; border:1px solid var(--border); border-radius:999px; }
 .reviews-search input { width:100%; border:0; background:transparent; font:inherit; outline:none; }
 .reviews-tools select { min-height:38px; border:1px solid var(--border); border-radius:999px; background:var(--background); padding:0 12px; font:inherit; }

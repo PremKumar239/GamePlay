@@ -143,13 +143,18 @@ export async function handleApi(request: Request) {
       const body = await parseBody(request);
       const name = String(body.name ?? '').trim();
       const phone = String(body.phone ?? '').trim();
+      const email = String(body.email ?? '').trim();
+      const address = String(body.address ?? '').trim();
+      const city = String(body.city ?? '').trim();
+      const details = String(body.details ?? '').trim();
+      const payment = body.payment_method === 'card' || body.payment_method === 'cod' ? body.payment_method : 'whatsapp';
       const items = Array.isArray(body.items) ? body.items as { product_id: number; quantity: number }[] : [];
-      if (!name || !phone) return json({ error: 'Name and phone are required.' }, 400);
+      if (!name || !phone || !email || !address || !city) return json({ error: 'Name, phone, email, address and city are required.' }, 400);
       if (!items.length || items.length > 30) return json({ error: 'Add between 1 and 30 products.' }, 400);
       const client = await db().connect();
       try {
         await client.query('begin');
-        const inserted = await client.query<{ id: number }>('insert into orders (order_number, customer_name, customer_phone, notes, status, payment_status, payment_method, total) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id', [`TMP-${randomBytes(8).toString('hex')}`, name, phone, null, 'pending', 'unpaid', 'whatsapp', 0]);
+        const inserted = await client.query<{ id: number }>('insert into orders (order_number, customer_name, customer_phone, customer_email, customer_address, notes, status, payment_status, payment_method, total) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) returning id', [`TMP-${randomBytes(8).toString('hex')}`, name, phone, email || null, [address, city].filter(Boolean).join(', ') || null, details || null, 'pending', 'unpaid', payment, 0]);
         const orderId = inserted.rows[0].id;
         const orderNumber = `GP-${String(orderId).padStart(5, '0')}`;
         let total = 0;
@@ -163,6 +168,7 @@ export async function handleApi(request: Request) {
           total += line;
           await client.query('insert into order_items (order_id, product_id, product_name, quantity, unit_price, line_total) values ($1,$2,$3,$4,$5,$6)', [orderId, row.id, row.name, qty, row.price, line]);
         }
+        if (payment === 'cod' && total >= 25000) throw Object.assign(new Error('Cash on delivery is only available under Rs. 25,000.'), { status: 400 });
         await client.query('update orders set order_number = $1, total = $2 where id = $3', [orderNumber, total, orderId]);
         await client.query('commit');
         return json({ orderNumber });

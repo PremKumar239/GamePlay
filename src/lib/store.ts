@@ -168,8 +168,17 @@ export async function loadStoreFacts(): Promise<StoreFacts | null> {
     return null;
   }
 }
-export async function placeEnquiry(name: string, phone: string, items: { product_id: number; quantity: number }[]) {
-  const result = await apiRequest<{ orderNumber: string }>('/api/enquiries', { method: 'POST', body: JSON.stringify({ name, phone, items }) });
+export async function placeEnquiry(input: {
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  details?: string;
+  payment_method?: 'card' | 'cod' | 'whatsapp';
+  items: { product_id: number; quantity: number }[];
+}) {
+  const result = await apiRequest<{ orderNumber: string }>('/api/enquiries', { method: 'POST', body: JSON.stringify(input) });
   return result.orderNumber;
 }
 export async function placeContactMessage(name: string, email: string, phone: string, message: string) {

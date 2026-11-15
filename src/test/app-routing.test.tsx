@@ -15,6 +15,11 @@ describe("App routing", () => {
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
 
+  it("matches the cart page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    expect(router.matchRoutes("/cart").at(-1)?.routeId).not.toBe(rootRouteId);
+  });
+
   it("matches the admin panel", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
     expect(router.matchRoutes("/admin").at(-1)?.routeId).not.toBe(rootRouteId);

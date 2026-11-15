@@ -402,8 +402,10 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 .admin-filters .admin-search { max-width:none; margin:0; }
 .admin-quick-filters { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 10px; }
 .footer button.block { width:100%; border:0; background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; padding:0; }
-.cart-row { display:grid; grid-template-columns:65px minmax(0,1fr) auto; gap:12px; align-items:center; padding-block:18px; border-bottom:1px solid var(--border); }
-.cart-row img { width:65px; height:65px; object-fit:contain; }
+.cart-layout { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(260px,360px); gap:28px; align-items:start; }
+.cart-summary { position:sticky; top:16px; padding:20px; border:1px solid var(--border); border-radius:8px; background:var(--background); }
+.cart-row { display:grid; grid-template-columns:80px minmax(0,1fr) auto; gap:12px; align-items:center; padding-block:18px; border-bottom:1px solid var(--border); }
+.cart-row img { width:80px; height:80px; object-fit:contain; }
 .catalog-tools { display:flex; gap:6px; flex-wrap:wrap; }
 @media(min-width:900px) { .scroll-reveal { animation:reveal ease both; animation-timeline:view(); animation-range:entry 0% entry 20%; } }
 @media(max-width:1100px) { .main-header { gap:22px; grid-template-columns:auto minmax(0,1fr) auto; } .header-action-text { display:none; } .nav-inner { gap:23px; } .hero-copy { padding:36px; } .hero h1 { font-size:54px; } .promo-copy { padding:22px; } .promo-copy h2 { font-size:30px; } }
@@ -512,7 +514,7 @@ html { scroll-behavior: smooth; scroll-padding-top: 24px; }
 }
 @media (max-width:640px) {
   .admin-content { padding:16px 12px 32px; }
-  .admin-stats,.admin-split,.admin-form-grid,.admin-detail-grid,.admin-filters,.reviews-score,.reviews-tools { grid-template-columns:1fr; }
+  .admin-stats,.admin-split,.admin-form-grid,.admin-detail-grid,.admin-filters,.reviews-score,.reviews-tools,.cart-layout { grid-template-columns:1fr; }
   .admin-heading h1 { font-size:30px; }
 }
 .showcase { position:relative; padding:36px 0 12px; background:var(--background); }

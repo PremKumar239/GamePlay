@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { ArrowRight, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Clock3, Gamepad2, Headphones, Heart, MapPin, Menu, MessageCircle, Minus, Phone, Plus, Search, ShieldCheck, ShoppingBag, ShoppingCart, Star, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import gamesBanner from '@/assets/games-banner.jpg';
@@ -20,7 +20,7 @@ import { useShopping } from '@/components/shopping-context';
 
 export function Brand() { return <Link to="/" className="brand" aria-label="GAME PLAY home"><img src="/favicon.png" alt="" width={52} height={52} /><span className="brand-lockup"><span className="brand-name">GAME PLAY</span><span className="brand-tag">Gaming store</span></span></Link>; }
 
-export function Storefront({ page = 'home', initialCategory = 'All', initialSub = '', initialQuery = '', initialDeals = false, productId }: { page?: 'home' | 'shop' | 'contact' | 'categories' | 'about' | 'product'; initialCategory?: string; initialSub?: string; initialQuery?: string; initialDeals?: boolean; productId?: number }) {
+export function Storefront({ page = 'home', initialCategory = 'All', initialSub = '', initialQuery = '', initialDeals = false, productId }: { page?: 'home' | 'shop' | 'contact' | 'categories' | 'about' | 'product' | 'cart'; initialCategory?: string; initialSub?: string; initialQuery?: string; initialDeals?: boolean; productId?: number }) {
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [subcategory, setSubcategory] = useState(initialSub);
@@ -32,7 +32,6 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
   const [reviewStats, setReviewStats] = useState({ rating: business.rating, count: business.reviews });
   const {cart, setCart, favorites, setFavorites, wishOnly, setWishOnly} = useShopping();
   const navigate = useNavigate();
-  const [cartOpen, setCartOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buyerName, setBuyerName] = useState('');
@@ -48,15 +47,8 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
     loadReviews().then(rows => { if (!cancel) setReviewStats({ rating: rows.rating, count: rows.count }); });
     return () => { cancel = true; };
   }, []);
-  useEffect(() => {
-    if (!cartOpen) return;
-    const before = document.body.style.overflow; document.body.style.overflow = 'hidden';
-    const close = (e: KeyboardEvent) => { if (e.key === 'Escape') setCartOpen(false); };
-    window.addEventListener('keydown', close);
-    return () => { document.body.style.overflow = before; window.removeEventListener('keydown', close); };
-  }, [cartOpen]);
   const count = Object.values(cart).reduce((s, n) => s + n, 0);
-  const add = (id: number) => { setCart(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 })); setCartOpen(true); };
+  const add = (id: number) => { setCart(prev => ({ ...prev, [id]: (prev[id] ?? 0) + 1 })); };
   const toggleFavorite = (id: number) => setFavorites(prev => prev.includes(id) ? prev.filter(n => n !== id) : [...prev, id]);
   const visible = filterProducts(category, query, deals, subcategory, listed).filter(p => !wishOnly || favorites.includes(p.id));
   const gridItems = page === 'home' && !wishOnly ? visible.slice(0, 8) : visible;
@@ -76,23 +68,81 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
     window.open(askStore(text), '_blank', 'noopener,noreferrer');
   };
   return <>
-    <header className="store-container main-header"><Brand /><form className="search-form" onSubmit={searchSubmit}><input aria-label="Search products" placeholder="Search for consoles, games, accessories..." value={query} onChange={e => setQuery(e.target.value)} /><Button type="submit" variant="shop" size="icon" aria-label="Submit search"><Search /></Button></form><div className="header-actions"><Button variant="ghost" className="header-action px-1" title="Wishlist" onClick={() => { setWishOnly(!wishOnly); if (page !== 'home' && page !== 'shop') navigate({ to: '/shop', search: shopSearch() }); else document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}><span className="cart-icon"><Heart size={23} className={wishOnly ? 'text-success' : ''} />{favorites.length > 0 && <span className="count-badge">{favorites.length}</span>}</span><span className="header-action-text text-xs">Wishlist</span></Button><Button variant="ghost" className="header-action cart-action px-1" aria-label={`Open shopping cart, ${count} items`} onClick={() => setCartOpen(true)}><span className="cart-icon"><ShoppingCart size={23} />{count > 0 && <span className="count-badge">{count}</span>}</span><span className="header-action-text text-left"><span className="block text-[10px] text-muted-foreground">Shopping cart</span><strong className="text-xs">{money(listedTotal)}</strong></span></Button></div></header>
+    <header className="store-container main-header"><Brand /><form className="search-form" onSubmit={searchSubmit}><input aria-label="Search products" placeholder="Search for consoles, games, accessories..." value={query} onChange={e => setQuery(e.target.value)} /><Button type="submit" variant="shop" size="icon" aria-label="Submit search"><Search /></Button></form><div className="header-actions"><Button variant="ghost" className="header-action px-1" title="Wishlist" onClick={() => { setWishOnly(!wishOnly); if (page !== 'home' && page !== 'shop') navigate({ to: '/shop', search: shopSearch() }); else document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' }); }}><span className="cart-icon"><Heart size={23} className={wishOnly ? 'text-success' : ''} />{favorites.length > 0 && <span className="count-badge">{favorites.length}</span>}</span><span className="header-action-text text-xs">Wishlist</span></Button><Button variant="ghost" className={`header-action cart-action px-1${page === 'cart' ? ' text-primary' : ''}`} asChild><Link to="/cart" aria-label={`Open shopping cart, ${count} items`}><span className="cart-icon"><ShoppingCart size={23} />{count > 0 && <span className="count-badge">{count}</span>}</span><span className="header-action-text text-left"><span className="block text-[10px] text-muted-foreground">Shopping cart</span><strong className="text-xs">{money(listedTotal)}</strong></span></Link></Button></div></header>
     <nav className="store-nav"><div className="store-container nav-inner"><Link className={`nav-link${page === 'home' ? ' is-active' : ''}`} to="/">Home</Link><Link className={`nav-link${page === 'shop' ? ' is-active' : ''}`} to="/shop" search={shopSearch()}>Products</Link><div className="nav-categories"><Button variant="ghost" className={`category-menu rounded-none px-0 hover:bg-transparent hover:text-primary${page === 'categories' ? ' text-primary' : ''}`} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Menu /> Categories <ChevronDown className="ml-2" /></Button></div><Link className={`nav-link${page === 'about' ? ' is-active' : ''}`} to="/about">About Us</Link><Link className={`nav-link${page === 'contact' ? ' is-active' : ''}`} to="/contact">Contact Us</Link><div className="nav-extra ml-auto flex shrink-0 items-center gap-3 text-[11px]"><a className="nav-extra-link" href={phoneLink(facts.phone)}><Headphones size={16} /> {facts.phone}</a><a className="nav-whatsapp" href={askStore('Hi GAME PLAY! I would like to ask about your products.')} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"><MessageCircle size={16} /> WhatsApp</a></div></div>{menuOpen && <><button type="button" className="mega-backdrop" aria-label="Close categories" onClick={() => setMenuOpen(false)} /><div className="mega-menu">{groups.map(group => <div className={`mega-group${openGroup === group.name ? ' is-open' : ''}`} key={group.name}><div className="mega-head"><Link to="/shop" search={shopSearch(group.name)} onClick={() => setMenuOpen(false)}>{group.name}</Link>{group.subcategories.length > 0 && <button type="button" className="mega-toggle" aria-expanded={openGroup === group.name} onClick={() => setOpenGroup(openGroup === group.name ? null : group.name)}><ChevronDown size={16} /></button>}</div><div className="mega-subs">{group.subcategories.map(sub => <Link key={sub} to="/shop" search={shopSearch(group.name, sub)} onClick={() => setMenuOpen(false)}>{sub}</Link>)}</div></div>)}<Link className="mega-all" to="/categories" onClick={() => setMenuOpen(false)}>View all categories</Link></div></>}</nav>
     <main>
       {page === 'home' && <><div className="store-container home-top"><Hero /><Benefits /><section className="section scroll-reveal"><SectionHeading title="Shop by Category" link="Explore all categories" to="/categories" /><div className="category-grid">{groups.map(c => <Link key={c.name} to="/shop" search={shopSearch(c.name)} className="category-tile">{c.image ? <img src={c.image} alt="" width={180} height={100} loading="lazy" /> : <span className="catalog-mark">{c.name.slice(0, 1)}</span>}<strong>{c.name}</strong><span>{c.label}</span></Link>)}</div></section><div className="promo-grid scroll-reveal"><Promo image={gamesBanner} eyebrow="A NEW WORLD AWAITS" title={<>Epic games.<br />Endless adventures.</>} category="Games" /><Promo image={accessoriesBanner} eyebrow="GEAR UP. GAME ON." title={<>Your setup.<br />Only better.</>} category="All" /></div></div><HomeShowcases products={listed} /><GiftCards ask={askStore} /><WhatsHot products={listed} /></>}
       {page === 'shop' && category === 'Gift Cards' && <GiftCards subcategory={subcategory} ask={askStore} flush />}{(page === 'home' || page === 'shop') && <section id="products" className="section store-container scroll-reveal">{page === 'shop' && <Breadcrumb category={category} subcategory={subcategory} />}<div className="section-heading"><h2>{wishOnly ? 'Your Wishlist' : page === 'shop' ? deals ? 'Special Offers' : category === 'All' ? 'Products' : subcategory ? `${category} ${subcategory}` : category : 'Featured Products'}</h2><div className="catalog-tools"><Button variant={category === 'All' && !subcategory ? 'dark' : 'ghost'} size="sm" onClick={() => { if (page === 'shop') { navigate({ to: '/shop', search: shopSearch('All', '', query, deals) }); return; } setCategory('All'); setSubcategory(''); }}>All Products</Button>{groups.map(group => <Button key={group.name} variant={category === group.name ? 'dark' : 'ghost'} size="sm" onClick={() => { if (page === 'shop' || group.name === 'Gift Cards') { navigate({ to: '/shop', search: shopSearch(group.name, '', query, deals) }); return; } setCategory(group.name); setSubcategory(''); }}>{group.name}</Button>)}</div></div>{activeGroup && activeGroup.subcategories.length > 0 && <div className="catalog-tools sub-tools">{activeGroup.subcategories.map(sub => <Button key={sub} variant={subcategory === sub ? 'dark' : 'ghost'} size="sm" onClick={() => { const next = subcategory === sub ? '' : sub; if (page === 'shop') { navigate({ to: '/shop', search: shopSearch(category, next, query, deals) }); return; } setSubcategory(next); }}>{sub}</Button>)}</div>}{page === 'shop' && <div className="mb-5 flex items-center justify-between gap-3"><span className="text-xs text-muted-foreground">{visible.length} products</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={deals} onChange={e => navigate({ to: '/shop', search: shopSearch(category, subcategory, query, e.target.checked) })} /> Special offers only</label></div>}{wishOnly && <Button size="sm" variant="outline" className="mb-4" onClick={() => setWishOnly(false)}>Show all products <X /></Button>}{gridItems.length ? <div className="product-grid">{gridItems.map(p => <ProductCard key={p.id} product={p} saved={favorites.includes(p.id)} onFavorite={() => toggleFavorite(p.id)} onAdd={() => add(p.id)} />)}</div> : category === 'Gift Cards' ? <GiftSkus brand={subcategory} ask={askStore} /> : <div className="py-16 text-center text-muted-foreground"><Search className="mx-auto mb-4" /><h3 className="font-bold">No products in {subcategory ? `${category} ${subcategory}` : category === 'All' ? 'this view' : category} yet</h3><p className="mx-auto mt-2 max-w-md text-xs">Ask the store what is available, or browse the rest of the catalog.</p><Button variant="link" onClick={() => { setWishOnly(false); if (page === 'shop') { navigate({ to: '/shop', search: shopSearch() }); return; } setQuery(''); setCategory('All'); setSubcategory(''); setDeals(false); }}>Browse all products</Button></div>}<p className="mt-5 text-[10px] text-muted-foreground">Sample catalog & indicative prices. Contact the store to confirm current stock, specifications and pricing.</p>{page === 'home' && <div className="mt-6 text-center"><Button variant="outline" asChild><Link to="/shop" search={shopSearch()}>View All Products <ArrowRight /></Link></Button></div>}</section>}
+      {page === 'cart' && <CartPage count={count} listed={listed} cart={cart} setCart={setCart} total={listedTotal} buyerName={buyerName} buyerPhone={buyerPhone} setBuyerName={setBuyerName} setBuyerPhone={setBuyerPhone} enquire={enquire} />}
       {page === 'product' && <ProductDetail product={detail} saved={detail ? favorites.includes(detail.id) : false} onFavorite={() => detail && toggleFavorite(detail.id)} onAdd={() => detail && add(detail.id)} ask={askStore} />}
       {page === 'categories' && <CategoryDirectory groups={groups} />}
       {page === 'about' && <AboutSection facts={facts} reviewStats={reviewStats} />}
       {page === 'home' && <div className="store-container"><div className="brand-band"><span>PlayStation.</span><span className="italic">XBOX</span><span>NINTENDO</span><span className="font-sans text-xl">logitech G</span><span>HYPERX</span><span>RAZER</span></div></div>}
-      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} reviewStats={reviewStats} />
+      {page !== 'cart' && <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} reviewStats={reviewStats} />}
     </main>
     <Footer groups={groups} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} />
     {!reviewsOpen && <ReviewsTab onOpen={() => setReviewsOpen(true)} />}
     <Button asChild variant="shop" className="floating-contact" title="Chat with GAME PLAY"><a href={askStore('Hi GAME PLAY! I would like to ask about your products.')} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"><MessageCircle size={24} /></a></Button>
     <ReviewsPanel open={reviewsOpen} onClose={() => setReviewsOpen(false)} mapsUrl={directions} />
-    {cartOpen && <div className="drawer-backdrop" onClick={() => setCartOpen(false)}><section className="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" onClick={e => e.stopPropagation()}><div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">Your Cart <span className="text-muted-foreground">({count})</span></h2><Button variant="ghost" size="icon" autoFocus aria-label="Close cart" onClick={() => setCartOpen(false)}><X /></Button></div>{count === 0 ? <div className="py-20 text-center"><ShoppingBag className="mx-auto mb-4 text-muted-foreground" size={40} /><h3 className="font-bold">Your next adventure is waiting.</h3><p className="my-3 text-xs text-muted-foreground">Your shopping cart is empty.</p><Button variant="shop" onClick={() => setCartOpen(false)}>Continue Shopping <ArrowRight /></Button></div> : <>{listed.filter(p => cart[p.id]).map(p => <div key={p.id} className="cart-row"><img src={p.image} alt={p.name} /><div className="min-w-0"><h3 className="text-xs font-bold">{p.name}</h3><p className="my-2 text-xs">{money(p.price)}</p><div className="flex items-center gap-2"><Button variant="outline" size="icon" aria-label={`Decrease ${p.name} quantity`} onClick={() => setCart(prev => ({...prev,[p.id]:Math.max(0,(prev[p.id] ?? 0)-1)}))}><Minus /></Button><span>{cart[p.id]}</span><Button variant="outline" size="icon" aria-label={`Increase ${p.name} quantity`} onClick={() => setCart(prev => ({...prev,[p.id]:(prev[p.id] ?? 0)+1}))}><Plus /></Button></div></div><Button variant="ghost" size="icon" aria-label={`Remove ${p.name}`} onClick={() => setCart(prev => ({...prev,[p.id]:0}))}><Trash2 /></Button></div>)}<div className="my-6 flex justify-between font-bold"><span>Estimated Total</span><span>{money(listedTotal)}</span></div><div className="cart-buyer"><input aria-label="Your name" placeholder="Your name" value={buyerName} onChange={e => setBuyerName(e.target.value)} /><input aria-label="Your phone" placeholder="Your phone" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} /></div><Button variant="shop" className="mt-3 w-full" onClick={enquire}>Enquire on WhatsApp <ArrowUpRight /></Button><p className="mt-3 text-xs leading-relaxed text-muted-foreground">Add your name and phone so the store can see this enquiry. No payment is taken here.</p></>}</section></div>}
   </>;
+}
+
+function CartPage({ count, listed, cart, setCart, total, buyerName, buyerPhone, setBuyerName, setBuyerPhone, enquire }: {
+  count: number;
+  listed: Product[];
+  cart: Record<number, number>;
+  setCart: Dispatch<SetStateAction<Record<number, number>>>;
+  total: number;
+  buyerName: string;
+  buyerPhone: string;
+  setBuyerName: (value: string) => void;
+  setBuyerPhone: (value: string) => void;
+  enquire: () => void;
+}) {
+  return (
+    <section className="section store-container cart-page">
+      <nav className="crumbs" aria-label="Breadcrumb"><Link to="/">Home</Link><span aria-hidden="true">/</span><span>Cart</span></nav>
+      <div className="section-heading"><h2>Your Cart {count > 0 && <span className="text-muted-foreground">({count})</span>}</h2></div>
+      {count === 0 ? (
+        <div className="py-20 text-center">
+          <ShoppingBag className="mx-auto mb-4 text-muted-foreground" size={40} />
+          <h3 className="font-bold">Your next adventure is waiting.</h3>
+          <p className="my-3 text-xs text-muted-foreground">Your shopping cart is empty.</p>
+          <Button variant="shop" asChild><Link to="/shop" search={shopSearch()}>Continue Shopping <ArrowRight /></Link></Button>
+        </div>
+      ) : (
+        <div className="cart-layout">
+          <div className="cart-list">
+            {listed.filter(product => cart[product.id]).map(product => (
+              <div key={product.id} className="cart-row">
+                <img src={product.image} alt={product.name} />
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold">{product.name}</h3>
+                  <p className="my-2 text-sm">{money(product.price)}</p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" aria-label={`Decrease ${product.name} quantity`} onClick={() => setCart(prev => ({ ...prev, [product.id]: Math.max(0, (prev[product.id] ?? 0) - 1) }))}><Minus /></Button>
+                    <span>{cart[product.id]}</span>
+                    <Button variant="outline" size="icon" aria-label={`Increase ${product.name} quantity`} onClick={() => setCart(prev => ({ ...prev, [product.id]: (prev[product.id] ?? 0) + 1 }))}><Plus /></Button>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" aria-label={`Remove ${product.name}`} onClick={() => setCart(prev => ({ ...prev, [product.id]: 0 }))}><Trash2 /></Button>
+              </div>
+            ))}
+          </div>
+          <aside className="cart-summary">
+            <div className="flex justify-between font-bold"><span>Estimated Total</span><span>{money(total)}</span></div>
+            <div className="cart-buyer">
+              <input aria-label="Your name" placeholder="Your name" value={buyerName} onChange={event => setBuyerName(event.target.value)} />
+              <input aria-label="Your phone" placeholder="Your phone" value={buyerPhone} onChange={event => setBuyerPhone(event.target.value)} />
+            </div>
+            <Button variant="shop" className="mt-3 w-full" onClick={enquire}>Enquire on WhatsApp <ArrowUpRight /></Button>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Add your name and phone so the store can see this enquiry. No payment is taken here.</p>
+            <Button variant="outline" className="mt-4 w-full" asChild><Link to="/shop" search={shopSearch()}>Continue Shopping</Link></Button>
+          </aside>
+        </div>
+      )}
+    </section>
+  );
 }
 
 function SectionHeading({title,link,to}:{title:string;link?:string;to?:'/'|'/categories'|'/about'|'/contact'}) { return <div className="section-heading"><h2>{title}</h2>{link && (to ? <Link className="section-link" to={to}>{link} <ArrowRight size={14} /></Link> : <Link className="section-link" to="/shop" search={shopSearch()}>{link} <ArrowRight size={14} /></Link>)}</div>; }

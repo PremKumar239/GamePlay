@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router';
 import { ArrowLeft, Folders, LayoutDashboard, LineChart, LogOut, Menu, MessageSquareText, Package, Percent, Settings, ShoppingBag, Warehouse, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { loginAdmin, logoutAdmin, messageOf } from '@/lib/admin';
 
 const links = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -15,99 +15,37 @@ const links = [
   { to: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
 ] as const;
 
-type Gate = 'loading' | 'setup' | 'login' | 'denied' | 'ready';
+type Gate = 'loading' | 'login' | 'ready';
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: state => state.location.pathname });
   const [gate, setGate] = useState<Gate>('loading');
   const [notice, setNotice] = useState('');
-  const [email, setEmail] = useState('');
   const [account, setAccount] = useState('');
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    if (!supabase) {
-      setGate('setup');
-      return;
-    }
     let active = true;
-    let acceptSession = false;
-    const client = supabase;
-
-    async function applySession() {
-      const { data: { session } } = await client.auth.getSession();
-      if (!active || !acceptSession) return;
-      if (!session) {
-        setGate('login');
-        setAccount('');
-        return;
-      }
-      const { data: profile, error } = await client.from('profiles').select('role,email').eq('id', session.user.id).maybeSingle();
+    logoutAdmin().catch(() => undefined).finally(() => {
       if (!active) return;
-      if (error) {
-        setNotice(error.message);
-        setGate('setup');
-        return;
-      }
-      if (profile?.role !== 'admin') {
-        setAccount(profile?.email || session.user.email || '');
-        setGate('denied');
-        return;
-      }
-      setAccount(profile.email || session.user.email || '');
-      setGate('ready');
-    }
-
-    async function boot() {
-      // Always clear any saved session so opening /admin asks for email and password.
-      await client.auth.signOut();
-      if (!active) return;
-      acceptSession = true;
-      setGate('login');
       setAccount('');
-    }
-
-    void boot();
-    const { data: subscription } = client.auth.onAuthStateChange(() => { void applySession(); });
-    return () => {
-      active = false;
-      subscription.subscription.unsubscribe();
-    };
+      setGate('login');
+    });
+    return () => { active = false; };
   }, []);
 
   async function signOut() {
-    await supabase?.auth.signOut();
+    await logoutAdmin().catch(() => undefined);
+    setAccount('');
     setNavOpen(false);
+    setGate('login');
   }
 
   if (gate === 'loading') {
     return <section className="admin-gate"><p>Checking access…</p></section>;
   }
-  if (gate === 'setup') {
-    return (
-      <section className="admin-gate">
-        <form className="admin-card">
-          <p className="admin-kicker">GAME PLAY</p>
-          <h1>Admin setup needed</h1>
-          <p>Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_ANON_KEY</code> to <code>.env</code>, then run the admin SQL in the Supabase SQL editor.</p>
-          {notice && <p className="admin-notice is-error">{notice}</p>}
-        </form>
-      </section>
-    );
-  }
-  if (gate === 'login') return <Login onError={setNotice} notice={notice} />;
-  if (gate === 'denied') {
-    return (
-      <section className="admin-gate">
-        <div className="admin-card">
-          <p className="admin-kicker">GAME PLAY</p>
-          <h1>This account is not an admin</h1>
-          <p>{account || 'This user'} can sign in, but only a profile with the admin role can open the panel. Promote the user from the Supabase SQL editor, then sign in again.</p>
-          <button type="button" className="admin-button" onClick={signOut}>Sign out</button>
-          <Link className="admin-side-link" to="/"><ArrowLeft size={15} /> Back to website</Link>
-        </div>
-      </section>
-    );
+  if (gate === 'login') {
+    return <Login notice={notice} onError={setNotice} onReady={email => { setAccount(email); setGate('ready'); }} />;
   }
 
   return (
@@ -132,7 +70,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <div className="admin-side-foot">
           <span>{account}</span>
           <Link className="admin-side-link" to="/" onClick={() => setNavOpen(false)}><ArrowLeft size={15} /> Back to website</Link>
-          <button type="button" onClick={signOut}><LogOut size={15} /> Log out</button>
+          <button type="button" onClick={() => void signOut()}><LogOut size={15} /> Log out</button>
         </div>
       </aside>
       <div className="admin-main">
@@ -146,19 +84,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
   );
 }
 
-function Login({ notice, onError }: { notice: string; onError: (value: string) => void }) {
+function Login({ notice, onError, onReady }: { notice: string; onError: (value: string) => void; onReady: (email: string) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (!supabase) return;
     setBusy(true);
     onError('');
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setBusy(false);
-    if (error) onError(error.message);
+    try {
+      const account = await loginAdmin(email.trim(), password);
+      onReady(account);
+    } catch (reason) {
+      onError(messageOf(reason));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -166,7 +108,7 @@ function Login({ notice, onError }: { notice: string; onError: (value: string) =
       <form className="admin-card" onSubmit={submit}>
         <p className="admin-kicker">GAME PLAY</p>
         <h1>Admin sign in</h1>
-        <p>Enter your email and password each time you open the admin panel.</p>
+        <p>Enter your email and password each time you open the admin panel. Data is stored in local PostgreSQL / pgAdmin.</p>
         <label>Email<input type="email" autoComplete="username" value={email} onChange={event => setEmail(event.target.value)} required /></label>
         <label>Password<input type="password" autoComplete="current-password" value={password} onChange={event => setPassword(event.target.value)} required /></label>
         {notice && <p className="admin-notice is-error">{notice}</p>}

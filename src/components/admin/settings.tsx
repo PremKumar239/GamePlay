@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { fetchSettings, messageOf, saveSettings, type StoreSettings } from '@/lib/admin';
-import { supabase } from '@/lib/supabase';
+import { fetchAdminSession, fetchSettings, logoutAdmin, messageOf, saveSettings, type StoreSettings } from '@/lib/admin';
 import { AdminHeader, AdminNotice } from '@/components/admin/ui';
 
 export function SettingsPage() {
@@ -23,7 +22,7 @@ export function SettingsPage() {
         low_stock_threshold: settings.low_stock_threshold,
       });
     }).catch(reason => { if (!cancel) setError(messageOf(reason)); });
-    supabase?.auth.getUser().then(({ data }) => { if (!cancel) setEmail(data.user?.email ?? ''); });
+    fetchAdminSession().then(value => { if (!cancel) setEmail(value); }).catch(() => undefined);
     return () => { cancel = true; };
   }, []);
 
@@ -73,7 +72,7 @@ export function SettingsPage() {
       <section className="admin-panel">
         <h2>Session</h2>
         <p className="admin-muted">Signed in as {email || 'an admin'}.</p>
-        <button type="button" className="admin-button is-quiet" onClick={() => void supabase?.auth.signOut()}>Log out</button>
+        <button type="button" className="admin-button is-quiet" onClick={() => { void logoutAdmin().then(() => window.location.assign('/admin')); }}>Log out</button>
       </section>
     </section>
   );

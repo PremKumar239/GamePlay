@@ -18,7 +18,7 @@ import metaCategory from '@/assets/category-meta.png';
 import mobilesCategory from '@/assets/category-mobiles.png';
 import laptopCategory from '@/assets/category-laptop.png';
 import giftCardsCategory from '@/assets/category-gift-cards.jpg';
-import { supabase } from '@/lib/supabase';
+import { apiRequest } from '@/lib/http';
 
 const productImages: Record<string, string> = {
   'product-0': consoleImage,
@@ -89,33 +89,29 @@ export const money = (value: number) => `Rs. ${value.toLocaleString('en-PK')}`;
 export const getProduct = (id: number, source: Product[] = products) => source.find(product => product.id === id) ?? null;
 type ProductRow = { id: number; name: string; category: string; group_name: string | null; subcategory: string | null; image_key: string; image_url?: string | null; price: number; old_price: number | null; badge: string | null; description?: string | null; stock?: number | null };
 export async function loadProductsFromDatabase(): Promise<Product[] | null> {
-  const db = supabase;
-  if (!db) return null;
-  const read = (columns: string) => db.from('products').select(columns).order('id');
-  let result = await read('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge,description,stock');
-  if (result.error) result = await read('id,name,category,group_name,subcategory,image_key,image_url,price,old_price,badge');
-  if (result.error) result = await read('id,name,category,group_name,subcategory,image_key,price,old_price,badge');
-  const { data, error } = result;
-  if (error || !data?.length) return null;
-  return (data as unknown as ProductRow[]).map(row => {
-    const product: Product = {
-      id: row.id,
-      name: row.name,
-      category: row.category,
-      image: row.image_url || productImages[row.image_key] || consoleImage,
-      price: row.price,
-    };
-    if (row.group_name) product.group = row.group_name;
-    if (row.subcategory) product.subcategory = row.subcategory;
-    if (row.old_price != null) product.oldPrice = row.old_price;
-    if (row.badge) product.badge = row.badge;
-    if (row.description) product.description = row.description;
-    if (typeof row.stock === 'number') product.stock = row.stock;
-    return product;
-  });
+  try {
+    const result = await apiRequest<{ products: ProductRow[] }>('/api/products');
+    if (!result.products?.length) return null;
+    return result.products.map(row => {
+      const product: Product = {
+        id: row.id,
+        name: row.name,
+        category: row.category,
+        image: row.image_url || productImages[row.image_key] || consoleImage,
+        price: row.price,
+      };
+      if (row.group_name) product.group = row.group_name;
+      if (row.subcategory) product.subcategory = row.subcategory;
+      if (row.old_price != null) product.oldPrice = row.old_price;
+      if (row.badge) product.badge = row.badge;
+      if (row.description) product.description = row.description;
+      if (typeof row.stock === 'number') product.stock = row.stock;
+      return product;
+    });
+  } catch {
+    return null;
+  }
 }
-type CategoryRow = { id: number; name: string; label: string | null; sort_order: number };
-type SubcategoryRow = { category_id: number; name: string; sort_order: number };
 export function mergeCatalog(remote: CatalogGroup[] | null) {
   if (!remote?.length) return catalog;
   const byName = new Map(remote.map(group => [group.name, group]));
@@ -133,53 +129,44 @@ export function mergeCatalog(remote: CatalogGroup[] | null) {
   return merged;
 }
 export async function loadCatalogFromDatabase(): Promise<CatalogGroup[] | null> {
-  if (!supabase) return null;
-  const categories = await supabase.from('categories').select('id,name,label,sort_order').order('sort_order');
-  if (categories.error || !categories.data?.length) return null;
-  const subs = await supabase.from('subcategories').select('category_id,name,sort_order').order('sort_order');
-  if (subs.error) return null;
-  const images = new Map(catalog.map(group => [group.name, group.image]));
-  return (categories.data as CategoryRow[]).map(row => {
-    const group: CatalogGroup = {
-      name: row.name,
-      label: row.label || '',
-      subcategories: ((subs.data ?? []) as SubcategoryRow[]).filter(sub => sub.category_id === row.id).sort((a, b) => a.sort_order - b.sort_order).map(sub => sub.name),
-    };
-    const image = images.get(row.name);
-    if (image) group.image = image;
-    return group;
-  });
+  try {
+    const result = await apiRequest<{ catalog: CatalogGroup[] }>('/api/catalog');
+    if (!result.catalog?.length) return null;
+    const images = new Map(catalog.map(group => [group.name, group.image]));
+    return result.catalog.map(row => {
+      const group: CatalogGroup = { name: row.name, label: row.label || '', subcategories: row.subcategories };
+      const image = images.get(row.name);
+      if (image) group.image = image;
+      return group;
+    });
+  } catch {
+    return null;
+  }
 }
 export type StoreFacts = { name: string; phone: string; whatsappNumber: string; address: string; closingTime: string };
 export const defaultFacts: StoreFacts = { name: business.name, phone: business.phone, whatsappNumber: '923235551600', address: business.address, closingTime: business.closingTime };
 export async function loadStoreFacts(): Promise<StoreFacts | null> {
-  if (!supabase) return null;
-  const result = await supabase.from('store_settings').select('store_name,phone,whatsapp_number,address,closing_time').eq('id', 1).maybeSingle();
-  if (result.error || !result.data) return null;
-  return {
-    name: result.data.store_name || business.name,
-    phone: result.data.phone || business.phone,
-    whatsappNumber: result.data.whatsapp_number || defaultFacts.whatsappNumber,
-    address: result.data.address || business.address,
-    closingTime: result.data.closing_time || business.closingTime,
-  };
+  try {
+    const result = await apiRequest<{ facts: StoreFacts | null }>('/api/settings');
+    if (!result.facts) return null;
+    return {
+      name: result.facts.name || business.name,
+      phone: result.facts.phone || business.phone,
+      whatsappNumber: result.facts.whatsappNumber || defaultFacts.whatsappNumber,
+      address: result.facts.address || business.address,
+      closingTime: result.facts.closingTime || business.closingTime,
+    };
+  } catch {
+    return null;
+  }
 }
 export async function placeEnquiry(name: string, phone: string, items: { product_id: number; quantity: number }[]) {
-  if (!supabase) return null;
-  const { data, error } = await supabase.rpc('place_enquiry', { buyer_name: name, buyer_phone: phone, buyer_note: '', items });
-  if (error) throw new Error(error.message);
-  return data as string;
+  const result = await apiRequest<{ orderNumber: string }>('/api/enquiries', { method: 'POST', body: JSON.stringify({ name, phone, items }) });
+  return result.orderNumber;
 }
 export async function placeContactMessage(name: string, email: string, phone: string, message: string) {
-  if (!supabase) throw new Error('Supabase is not configured.');
-  const { data, error } = await supabase.rpc('place_contact_message', {
-    buyer_name: name,
-    buyer_email: email,
-    buyer_phone: phone,
-    buyer_message: message,
-  });
-  if (error) throw new Error(error.message);
-  return data as number;
+  const result = await apiRequest<{ id: number }>('/api/contact', { method: 'POST', body: JSON.stringify({ name, email, phone, message }) });
+  return result.id;
 }
 export function filterProducts(category: string, query: string, deals = false, subcategory = '', source: Product[] = products) {
   return source.filter(p => {

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { business, catalog, filterProducts, cartTotal, getProduct, mailTo, mergeCatalog, phoneLink, whatsapp, whatsappTo } from '@/lib/store';
 describe('Supplied store details', () => {
-  it('preserves the supplied rating', () => expect(business.rating).toBe(4.8));
-  it('preserves the supplied review count', () => expect(business.reviews).toBe(76));
+  it('preserves the supplied rating', () => expect(business.rating).toBe(4.7));
+  it('preserves the supplied review count', () => expect(business.reviews).toBe(106));
   it('preserves the supplied closing time', () => expect(business.closingTime).toBe('11:30 PM'));
   it('preserves the supplied phone number', () => expect(business.phone).toBe('0323 5551600'));
   it('preserves the supplied address', () => expect(business.address).toBe('1st Floor, 66B, Sector C Commercial Area, Bahria Town, Lahore, 56000, Pakistan'));

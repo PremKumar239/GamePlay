@@ -23,6 +23,9 @@ export function ProductsPage() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [query, setQuery] = useState('');
+  const [groupFilter, setGroupFilter] = useState('All');
+  const [subFilter, setSubFilter] = useState('');
+  const [stockFilter, setStockFilter] = useState<'all' | 'in' | 'out'>('all');
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -41,11 +44,23 @@ export function ProductsPage() {
     return () => { cancel = true; };
   }, []);
 
+  const groups = useMemo(() => {
+    return [...new Set(products.map(product => product.group_name).filter((name): name is string => Boolean(name)))].sort();
+  }, [products]);
+  const subcategories = useMemo(() => {
+    return [...new Set(products.filter(product => groupFilter === 'All' || product.group_name === groupFilter).map(product => product.subcategory).filter((name): name is string => Boolean(name)))].sort();
+  }, [products, groupFilter]);
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
-    if (!needle) return products;
-    return products.filter(product => [product.name, product.group_name, product.subcategory, product.category].join(' ').toLowerCase().includes(needle));
-  }, [products, query]);
+    return products.filter(product => {
+      if (groupFilter !== 'All' && product.group_name !== groupFilter) return false;
+      if (subFilter && product.subcategory !== subFilter) return false;
+      if (stockFilter === 'in' && product.stock <= 0) return false;
+      if (stockFilter === 'out' && product.stock > 0) return false;
+      if (!needle) return true;
+      return [product.name, product.group_name, product.subcategory, product.category].join(' ').toLowerCase().includes(needle);
+    });
+  }, [products, query, groupFilter, subFilter, stockFilter]);
 
   const subs = categories.find(category => category.name === draft?.group_name)?.subcategories ?? [];
 
@@ -137,7 +152,7 @@ export function ProductsPage() {
 
   return (
     <section>
-      <AdminHeader title="Products" text="Add, edit, search, and remove products stored in Supabase." action={<button type="button" className="admin-button" onClick={() => { setDraft(emptyDraft); setError(''); setNotice(''); }}>Add product</button>} />
+      <AdminHeader title="Products" text="Add, edit, search, and filter products stored in PostgreSQL." action={<button type="button" className="admin-button" onClick={() => { setDraft(emptyDraft); setError(''); setNotice(''); }}>Add product</button>} />
       {error && <AdminNotice>{error}</AdminNotice>}
       {notice && <AdminNotice tone="ok">{notice}</AdminNotice>}
       {draft && (
@@ -172,7 +187,35 @@ export function ProductsPage() {
         </form>
       )}
       <div className="admin-panel">
-        <label className="admin-search">Search<input value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or category" /></label>
+        <div className="admin-filters">
+          <label className="admin-search">Search<input value={query} onChange={event => setQuery(event.target.value)} placeholder="Name or category" /></label>
+          <label>Category
+            <select value={groupFilter} onChange={event => { setGroupFilter(event.target.value); setSubFilter(''); }}>
+              <option value="All">All categories</option>
+              {groups.map(group => <option key={group} value={group}>{group}</option>)}
+            </select>
+          </label>
+          <label>Subcategory
+            <select value={subFilter} onChange={event => setSubFilter(event.target.value)}>
+              <option value="">All subcategories</option>
+              {subcategories.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+            </select>
+          </label>
+          <label>Stock
+            <select value={stockFilter} onChange={event => setStockFilter(event.target.value as 'all' | 'in' | 'out')}>
+              <option value="all">All stock</option>
+              <option value="in">In stock</option>
+              <option value="out">Out of stock</option>
+            </select>
+          </label>
+        </div>
+        <div className="admin-quick-filters">
+          <button type="button" className={groupFilter === 'All' && !subFilter && stockFilter === 'all' ? 'is-on' : ''} onClick={() => { setGroupFilter('All'); setSubFilter(''); setStockFilter('all'); }}>All</button>
+          {groups.map(group => (
+            <button type="button" key={group} className={groupFilter === group ? 'is-on' : ''} onClick={() => { setGroupFilter(group); setSubFilter(''); }}>{group}</button>
+          ))}
+        </div>
+        <p className="admin-muted">{visible.length} of {products.length} products</p>
         {visible.length === 0 ? <AdminEmpty>No products match this search.</AdminEmpty> : (
           <div className="admin-table-wrap">
             <table className="admin-table">

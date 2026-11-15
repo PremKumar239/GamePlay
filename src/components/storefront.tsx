@@ -14,6 +14,7 @@ import giftBannerMix from '@/assets/gift-banner-mix.jpg';
 import giftBannerDepot from '@/assets/gift-banner-depot.jpg';
 import giftBannerSteam from '@/assets/gift-banner-steam.jpg';
 import { HomeShowcases } from '@/components/product-showcase';
+import { ReviewsPanel, ReviewsTab } from '@/components/reviews-panel';
 import { business, catalog, defaultFacts, giftAmounts, giftBrands, getProduct, products, money, mailTo, filterProducts, phoneLink, shopSearch, loadCatalogFromDatabase, loadProductsFromDatabase, loadStoreFacts, mergeCatalog, placeContactMessage, placeEnquiry, whatsappTo, type CatalogGroup, type Product, type StoreFacts } from '@/lib/store';
 import { useShopping } from '@/components/shopping-context';
 
@@ -31,6 +32,7 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
   const {cart, setCart, favorites, setFavorites, wishOnly, setWishOnly} = useShopping();
   const navigate = useNavigate();
   const [cartOpen, setCartOpen] = useState(false);
+  const [reviewsOpen, setReviewsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buyerName, setBuyerName] = useState('');
   const [buyerPhone, setBuyerPhone] = useState('');
@@ -80,10 +82,12 @@ export function Storefront({ page = 'home', initialCategory = 'All', initialSub 
       {page === 'categories' && <CategoryDirectory groups={groups} />}
       {page === 'about' && <AboutSection facts={facts} />}
       {page === 'home' && <div className="store-container"><div className="brand-band"><span>PlayStation.</span><span className="italic">XBOX</span><span>NINTENDO</span><span className="font-sans text-xl">logitech G</span><span>HYPERX</span><span>RAZER</span></div></div>}
-      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} />
+      <ContactSection full={page === 'contact'} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} />
     </main>
-    <Footer groups={groups} facts={facts} directions={directions} ask={askStore} />
+    <Footer groups={groups} facts={facts} directions={directions} ask={askStore} onOpenReviews={() => setReviewsOpen(true)} />
+    {!reviewsOpen && <ReviewsTab onOpen={() => setReviewsOpen(true)} />}
     <Button asChild variant="shop" className="floating-contact" title="Chat with GAME PLAY"><a href={askStore('Hi GAME PLAY! I would like to ask about your products.')} target="_blank" rel="noreferrer" aria-label="Chat on WhatsApp"><MessageCircle size={24} /></a></Button>
+    <ReviewsPanel open={reviewsOpen} onClose={() => setReviewsOpen(false)} mapsUrl={directions} />
     {cartOpen && <div className="drawer-backdrop" onClick={() => setCartOpen(false)}><section className="cart-drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" onClick={e => e.stopPropagation()}><div className="flex items-center justify-between"><h2 className="text-xl font-extrabold">Your Cart <span className="text-muted-foreground">({count})</span></h2><Button variant="ghost" size="icon" autoFocus aria-label="Close cart" onClick={() => setCartOpen(false)}><X /></Button></div>{count === 0 ? <div className="py-20 text-center"><ShoppingBag className="mx-auto mb-4 text-muted-foreground" size={40} /><h3 className="font-bold">Your next adventure is waiting.</h3><p className="my-3 text-xs text-muted-foreground">Your shopping cart is empty.</p><Button variant="shop" onClick={() => setCartOpen(false)}>Continue Shopping <ArrowRight /></Button></div> : <>{listed.filter(p => cart[p.id]).map(p => <div key={p.id} className="cart-row"><img src={p.image} alt={p.name} /><div className="min-w-0"><h3 className="text-xs font-bold">{p.name}</h3><p className="my-2 text-xs">{money(p.price)}</p><div className="flex items-center gap-2"><Button variant="outline" size="icon" aria-label={`Decrease ${p.name} quantity`} onClick={() => setCart(prev => ({...prev,[p.id]:Math.max(0,(prev[p.id] ?? 0)-1)}))}><Minus /></Button><span>{cart[p.id]}</span><Button variant="outline" size="icon" aria-label={`Increase ${p.name} quantity`} onClick={() => setCart(prev => ({...prev,[p.id]:(prev[p.id] ?? 0)+1}))}><Plus /></Button></div></div><Button variant="ghost" size="icon" aria-label={`Remove ${p.name}`} onClick={() => setCart(prev => ({...prev,[p.id]:0}))}><Trash2 /></Button></div>)}<div className="my-6 flex justify-between font-bold"><span>Estimated Total</span><span>{money(listedTotal)}</span></div><div className="cart-buyer"><input aria-label="Your name" placeholder="Your name" value={buyerName} onChange={e => setBuyerName(e.target.value)} /><input aria-label="Your phone" placeholder="Your phone" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} /></div><Button variant="shop" className="mt-3 w-full" onClick={enquire}>Enquire on WhatsApp <ArrowUpRight /></Button><p className="mt-3 text-xs leading-relaxed text-muted-foreground">Add your name and phone so the store can see this enquiry. No payment is taken here.</p></>}</section></div>}
   </>;
 }
@@ -219,7 +223,7 @@ function ProductDetail({ product, saved, onFavorite, onAdd, ask }: { product: Pr
     </div>
   </section>;
 }
-function ContactSection({ full, facts, directions, ask }: { full: boolean; facts: StoreFacts; directions: string; ask: (text: string) => string }) {
+function ContactSection({ full, facts, directions, ask, onOpenReviews }: { full: boolean; facts: StoreFacts; directions: string; ask: (text: string) => string; onOpenReviews: () => void }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -281,7 +285,7 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
         <div className="mt-5 flex items-center gap-3">
           <div className="flex gap-0.5 text-rating">{[1, 2, 3, 4, 5].map(s => <Star key={s} size={15} fill="currentColor" />)}</div>
           <strong>{business.rating}/5</strong>
-          <a className="text-xs text-muted-foreground underline" href={directions} target="_blank" rel="noreferrer">{business.reviews} customer reviews</a>
+          <button type="button" className="text-xs text-muted-foreground underline" onClick={onOpenReviews}>{business.reviews} customer reviews</button>
         </div>
         <div className="contact-detail"><MapPin /><div><strong>Find us</strong><p>{facts.address}</p></div></div>
         <div className="contact-detail"><Phone /><div><strong>Let's talk gaming</strong><p><a href={phoneLink(facts.phone)}>{facts.phone}</a></p></div></div>
@@ -318,12 +322,15 @@ function ContactSection({ full, facts, directions, ask }: { full: boolean; facts
       </div>
       <div className="mt-8 border-t border-border pt-6">
         <h3 className="mb-2 text-lg font-bold">Customer Reviews</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} customers.</p>
-        <Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Read Reviews on Google Maps <ArrowUpRight /></a></Button>
+        <p className="mb-4 text-sm text-muted-foreground">Rated {business.rating} out of 5 by {business.reviews} Google reviews for GAME PLAY Bahria.</p>
+        <div className="flex flex-wrap gap-3">
+          <Button type="button" variant="shop" onClick={onOpenReviews}>Read reviews</Button>
+          <Button asChild variant="outline"><a href={directions} target="_blank" rel="noreferrer">Open Google Maps <ArrowUpRight /></a></Button>
+        </div>
       </div>
       <div className="contact-visit-last">{visitBlock}</div>
     </>}
     {!full && visitBlock}
   </section>;
 }
-function Footer({ groups, facts, directions, ask }: { groups: CatalogGroup[]; facts: StoreFacts; directions: string; ask: (text: string) => string }) { return <footer className="footer"><div className="store-container footer-grid"><div><Brand /><p className="mt-5 max-w-xs">Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><a href={directions} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1">Find our store <ArrowUpRight size={12} /></a></div><div><h3>Shop GAME PLAY</h3>{groups.map(group => <Link className="block" key={group.name} to="/shop" search={shopSearch(group.name)}>{group.name}</Link>)}</div><div><h3>Explore</h3><Link className="block" to="/">Home</Link><Link className="block" to="/shop" search={shopSearch()}>Products</Link><Link className="block" to="/categories">Categories</Link><Link className="block" to="/shop" search={shopSearch('All', '', '', true)}>Special Offers</Link><Link className="block" to="/about">About Us</Link><Link className="block" to="/contact">Contact Us</Link><a className="block" href={directions} target="_blank" rel="noreferrer">Customer Reviews</a></div><div><h3>Get in Touch</h3><p>{facts.address}</p><a className="mt-3 block" href={phoneLink(facts.phone)}>{facts.phone}</a><p>Closes at {facts.closingTime}</p><a className="mt-3 flex items-center gap-2" href={ask('Hi GAME PLAY!')} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a></div></div><div className="footer-bottom"><div className="store-container flex flex-wrap justify-between gap-3"><span>© {new Date().getFullYear()} GAME PLAY. All rights reserved.</span><span>Made for the love of gaming.</span></div></div></footer>; }
+function Footer({ groups, facts, directions, ask, onOpenReviews }: { groups: CatalogGroup[]; facts: StoreFacts; directions: string; ask: (text: string) => string; onOpenReviews: () => void }) { return <footer className="footer"><div className="store-container footer-grid"><div><Brand /><p className="mt-5 max-w-xs">Your destination for consoles, games and gaming essentials. Built for players. Right here in Lahore.</p><a href={directions} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-1">Find our store <ArrowUpRight size={12} /></a></div><div><h3>Shop GAME PLAY</h3>{groups.map(group => <Link className="block" key={group.name} to="/shop" search={shopSearch(group.name)}>{group.name}</Link>)}</div><div><h3>Explore</h3><Link className="block" to="/">Home</Link><Link className="block" to="/shop" search={shopSearch()}>Products</Link><Link className="block" to="/categories">Categories</Link><Link className="block" to="/shop" search={shopSearch('All', '', '', true)}>Special Offers</Link><Link className="block" to="/about">About Us</Link><Link className="block" to="/contact">Contact Us</Link><button type="button" className="block" onClick={onOpenReviews}>Customer Reviews</button></div><div><h3>Get in Touch</h3><p>{facts.address}</p><a className="mt-3 block" href={phoneLink(facts.phone)}>{facts.phone}</a><p>Closes at {facts.closingTime}</p><a className="mt-3 flex items-center gap-2" href={ask('Hi GAME PLAY!')} target="_blank" rel="noreferrer"><MessageCircle size={16} /> Chat on WhatsApp</a></div></div><div className="footer-bottom"><div className="store-container flex flex-wrap justify-between gap-3"><span>© {new Date().getFullYear()} GAME PLAY. All rights reserved.</span><span>Made for the love of gaming.</span></div></div></footer>; }

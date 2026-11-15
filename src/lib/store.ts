@@ -31,7 +31,7 @@ const productImages: Record<string, string> = {
 };
 
 export const business = {
-  name: 'GAME PLAY', rating: 4.8, reviews: 76,
+  name: 'GAME PLAY', rating: 4.7, reviews: 106,
   address: '1st Floor, 66B, Sector C Commercial Area, Bahria Town, Lahore, 56000, Pakistan',
   phone: '0323 5551600', email: 'gameplay@gmail.com', closingTime: '11:30 PM',
 };
